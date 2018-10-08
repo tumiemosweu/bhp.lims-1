@@ -8,7 +8,6 @@ from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestAnalysesView as BaseAnalysesView
-from bika.lims.browser.analysisrequest import AnalysisRequestLog as BaseLogView
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestManageResultsView as BaseManageResultsView
 from bika.lims.browser.analysisrequest import \
@@ -104,14 +103,6 @@ class AnalysisRequestPublishedResultsView(BasePublishedResultsView):
 
     def __call__(self):
         template = super(AnalysisRequestPublishedResultsView, self).__call__()
-        handle_email_panic(self)
-        return template
-
-
-class AnalysisRequestLogView(BaseLogView):
-
-    def __call__(self):
-        template = super(AnalysisRequestLogView, self).__call__()
         handle_email_panic(self)
         return template
 

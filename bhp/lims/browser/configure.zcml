@@ -164,14 +164,7 @@
     permission="bika.lims.ManageAnalysisRequests"
     layer="bhp.lims.interfaces.IBhpLIMS"
   />
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="log"
-    class=".analysisrequest.AnalysisRequestLogView"
-    permission="bika.lims.ManageAnalysisRequests"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
+ 
   <browser:page
     for="*"
     name="email_popup"
