@@ -396,7 +396,7 @@
               </thead>
               <tbody>
                 <tal:analyses tal:repeat="analysis python:view.get_analyses_by(model, poc=poc, category=category)">
-                  <tr>
+                  <tr tal:condition="python:analysis.review_state != 'retracted'">
                     <td class="analysis">
                       <span class="text-success"
                             tal:content="accredited_symbol"
