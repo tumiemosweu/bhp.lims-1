@@ -6,6 +6,7 @@ from Products.CMFPlone.utils import safe_unicode
 from bhp.lims import api as bapi
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
+from bika.lims import api
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestAnalysesView as BaseAnalysesView
 from bika.lims.browser.analysisrequest import \
@@ -23,17 +24,21 @@ from email.Utils import formataddr
 def handle_email_panic(view):
     # If the email for panic levels has been submitted, send the email
     if "email_popup_submit" in view.request:
-        send_panic_email(view)
+        if send_panic_email(view):
+            ar_uid = api.get_uid(view.context)
+            url = "{}/analysisrequests/publish?items={}".format(view.portal_url,
+                                                                ar_uid)
+            return view.request.response.redirect(url)
 
 
 def send_panic_email(view):
     ar = view.context
     if not IAnalysisRequest.providedBy(ar):
-        return
+        return False
 
     if not ar.has_analyses_in_panic():
         addMessage(view, _("No results exceed the panic levels"), 'warning')
-        return
+        return False
 
     # Send an alert email
     laboratory = view.context.bika_setup.laboratory
@@ -50,7 +55,6 @@ def send_panic_email(view):
     msg_txt = MIMEText(safe_unicode(body).encode('utf-8'), _subtype='html')
     mime_msg.preamble = 'This is a multi-part MIME message.'
     mime_msg.attach(msg_txt)
-    succeed = False
     try:
         host = getToolByName(view.context, 'MailHost')
         host.send(mime_msg.as_string(), immediate=True)
@@ -61,8 +65,9 @@ def send_panic_email(view):
                     'that some results exceeded the panic levels') \
                   + (": %s" % str(msg))
         addMessage(view, message, 'warning')
+        return False
     bapi.set_field_value(view.context, "PanicEmailAlertSent", True)
-    return succeed
+    return True
 
 def addMessage(view, message, msg_type="info"):
     view.context.plone_utils.addPortalMessage(message, msg_type)
@@ -71,8 +76,8 @@ class AnalysisRequestView(AnalysisRequestViewView):
 
     def __call__(self):
         template = super(AnalysisRequestView, self).__call__()
-        handle_email_panic(self)
-        return template
+        if not handle_email_panic(self):
+            return template
 
 
 class AnalysisRequestAnalysesView(BaseAnalysesView):
