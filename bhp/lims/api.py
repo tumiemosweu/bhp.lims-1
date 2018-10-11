@@ -94,3 +94,31 @@ def to_age(age):
     months = get_age_value(age, 'm')
     days = get_age_value(age, 'd')
     return (years, months, days)
+
+
+def is_in_panic(brain_or_object):
+    """Returns true if the result for the analysis passed in is equal or below
+    the min panic or equal or above max panic
+    """
+    analysis = bapi.get_object(brain_or_object)
+    result = bapi.safe_getattr(analysis, "getResult", None)
+    if not bapi.is_floatable(result):
+        return False
+
+    result_range = bapi.safe_getattr(analysis, "getResultsRange", None)
+    if not result_range:
+        return False
+
+    # Out of range. Check if minpanic or maxpanic are set
+    result = bapi.to_float(result)
+    panic_min = result_range.get('minpanic', "")
+    panic_max = result_range.get('maxpanic', "")
+    panic_min = bapi.is_floatable(panic_min) and panic_min or None
+    panic_max = bapi.is_floatable(panic_max) and panic_max or None
+
+    if panic_min is not None and result <= panic_min:
+        return True
+
+    if panic_max is not None and result >= panic_max:
+        return True
+    return False

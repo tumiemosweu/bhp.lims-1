@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from bhp.lims import api
-from bika.lims.api.analysis import is_out_of_range
 
 def getAncestors(self, all_ancestors=True):
     """Returns the ancestor(s) of this Analysis Request
@@ -40,6 +39,6 @@ def getPrimaryAnalysisRequest(self):
 def has_analyses_in_panic(self):
     analyses = self.getAnalyses(full_objects=True, retracted=False)
     for analysis in analyses:
-        if is_out_of_range(analysis)[1]:
+        if api.is_in_panic(analysis):
             return True
     return False
