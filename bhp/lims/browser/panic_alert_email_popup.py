@@ -96,7 +96,7 @@ class EmailPopupView(BrowserView):
         return self.context.translate(
             _("Some results from the Analysis Request ${ar} "
               "exceeded the panic levels that may indicate an "
-              "imminent life-threatening condition: \n\n${arlist}\n"
+              "imminent life-threatening condition."
               "\n\n${lab_address}",
               mapping={'ar': ar.getId(),
                        'arlist': self.get_panic_analyses_list_message(ar),
