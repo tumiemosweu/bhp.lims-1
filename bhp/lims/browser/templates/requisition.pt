@@ -229,7 +229,7 @@
               <br/>
               <span>Botswana - Harvard Partnership</span>
               <br/>
-              <span>Tel: 3910388</span>
+              <span>Tel: </span><span tal:content="python: client.getPhone()"></span>
             </h2>
           </div>
         </div>
