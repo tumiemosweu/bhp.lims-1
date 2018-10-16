@@ -92,9 +92,12 @@
                     <span class="middle-dot-after"
                           tal:condition="laboratory/Fax"
                           tal:content="laboratory/Fax"></span>
-                    <a tal:condition="laboratory/EmailAddress"
+                      <p>Email:
+                          <a tal:condition="laboratory/EmailAddress"
                        tal:content="laboratory/EmailAddress"
                        tal:attributes="href string:mailto:${laboratory/EmailAddress}"></a>
+                      </p>
+
                   </div>
                 </div>
               </address>
@@ -126,14 +129,14 @@
               <div class="barcode"
                     data-code='code128'
                     data-showHRI='false'
-                    data-barHeight='15'
+                    data-barHeight='17'
                     data-addQuietZone='false'
                     tal:attributes="data-id model/id">
               </div>
               <div tal:content="model/id"></div>
             </td>
             <td class="align-middle">
-                <h1 i18n:translate="" class="text-uppercase align-text-bottom">LABORATORY SERVICES REPORT</h1>
+                <h1 i18n:translate="" class="text-uppercase align-text-bottom font-weight-bold">LABORATORY SERVICES REPORT</h1>
             </td>
           </tr>
         </table>
@@ -306,54 +309,36 @@
               <td class="value">
                 <span tal:content="python:view.to_localized_time(sample.DateReceived, long_format=1)"></span>
               </td>
-          </tr>
+          <!--</tr>-->
+            <!--<td></td>-->
+            <!--<td></td>-->
+            <!--<td></td>-->
+            <!--<td class="font-weight-bold">Date Tested</td>-->
+            <!--<td class="value">-->
+                <!--&lt;!&ndash;<span tal:content="python:view.to_localized_time(view.getDateTested(), long_format=1)"></span>&ndash;&gt;-->
+              <!--</td>-->
+            <!--<tr>-->
+
+            </tr>
         </table>
       </div>
     </div>
   </tal:render>
 
-  <!-- Results summary -->
+
+
+
+<!-- Results summary -->
   <tal:render define="reporter python:view.current_user;
                       verifiers python:model.getVerifiers();"
               condition="python: reporter and verifiers">
     <div class="row section-participant">
       <div class="col-sm-12">
         <h2>Results</h2>
-        <table class="table table-sm">
-          <tr>
-            <td class="font-weight-bold">Verified by</td>
-            <td class="value">
-                <span tal:define="verifs python: map(lambda verifier: verifier.getFullname(), verifiers)"
-                      tal:content="python: ', '.join(verifs)"></span>
-            </td>
-            <td class="cell-spacing"></td>
-            <td class="font-weight-bold">Date Published</td>
-            <td class="value">
-                <span tal:content="python:view.to_localized_time(date_published, long_format=False)"></span>
-            </td>
-          </tr>
-          <tr>
-              <td class="font-weight-bold">Reviewed and Released by</td>
-              <td class="value">
-                  <span tal:content="reporter/fullname"></span>
-              </td>
-              <td class="cell-spacing"></td>
-              <td class="label"></td>
-              <td class="value">
-                  <span></span>
-              </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </tal:render>
-
-  <!-- RESULTS -->
+            <!-- RESULTS -->
   <tal:render condition="python:True">
     <div class="row section-results">
       <div class="col col-sm-12">
-        <h1 i18n:translate="">Results</h1>
-
         <!-- Point of Capture -->
         <tal:poc define="analyses_by_poc python:view.get_analyses_by_poc(model);"
                  repeat="poc analyses_by_poc">
@@ -405,7 +390,7 @@
                             tal:condition="analysis/Accredited">
                       </span>
                       <span tal:condition="not:analysis/ScientificName">
-                        <span class="font-weight-normal" tal:content="analysis/title"></span>
+                        <span class="font-weight-bold" tal:content="analysis/title"></span>
                       </span>
                       <span tal:condition="analysis/ScientificName">
                         <span class="font-italic" tal:content="analysis/title"></span>
@@ -449,42 +434,45 @@
       </div>
     </div>
   </tal:render>
-
+        <table class="table table-sm">
+          <tr>
+            <td class="font-weight-bold">Verified by</td>
+            <td class="value">
+                <span tal:define="verifs python: map(lambda verifier: verifier.getFullname(), verifiers)"
+                      tal:content="python: ', '.join(verifs)"></span>
+            </td>
+            <td class="cell-spacing"></td>
+            <td class="font-weight-bold">Date Verified</td>
+            <td class="value">
+              <span tal:content="python:view.to_localized_time(model.getDateVerified())"></span>
+            </td>
+          </tr>
+          <tr>
+              <td class="font-weight-bold">Reviewed and Released by</td>
+              <td class="value">
+                  <span tal:content="reporter/fullname"></span>
+              </td>
+              <td class="cell-spacing"></td>
+              <td class="font-weight-bold">Date Published</td>
+              <td class="value">
+                  <span tal:content="python:view.to_localized_time(date_published, long_format=False)"></span>
+              </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </tal:render>
 
   <!--  SIGNATURES -->
   <tal:render condition="python:True">
     <div class="row section-signatures">
       <div class="col-sm-12">
-        <h1 i18n:translate="">Lab management</h1>
-        <div class="small-separator">&nbsp;</div>
         <div>
-            <div><span class="label">Lab Quality: </span>Thabani Ncube</div>
-            <div><span class="label">Lab Manager: </span>Terence Mohammed</div>
-            <div><span class="label">Lab Directors: </span>Sikhulile Moyo and Simani Gaseitsiwe</div>
+            <span class="label">Lab Quality: T.Ncube, </span>
+            <span class="label">Lab Manager: T.Mohammed, </span>
+            <span class="label">D/Lab Director: S.Moyo, </span>
+            <span class="label">Lab Director: S.Gaseitsewe</span>
         </div>
-        <table class="table table-sm table-condensed">
-          <tr>
-            <tal:manager repeat="manager python:model.managers">
-              <td style="border:none">
-                <div>
-                  <img tal:condition="manager/Signature"
-                       tal:attributes="src string:${manager/absolute_url}/Signature" style="height:75px"/>
-                </div>
-                <div class="font-weight-bold">
-                  <span tal:content="manager/Salutation"></span>
-                  <span tal:condition="manager/Salutation">&nbsp;</span>
-                  <span tal:content="manager/Fullname"></span>
-                </div>
-                <div>
-                  <span tal:content="manager/JobTitle"></span>
-                </div>
-                <div>
-                  <span tal:content="manager/DefaultDepartment/title|nothing"></span>
-                </div>
-              </td>
-            </tal:manager>
-          </tr>
-        </table>
       </div>
     </div>
   </tal:render>

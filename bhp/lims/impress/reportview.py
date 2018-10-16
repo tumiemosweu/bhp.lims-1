@@ -24,6 +24,11 @@ class BhpSingleReportView(SingleReportView):
         age = filter(lambda val: val != None, [years, months, days])
         return " ".join(age)
 
+    def getDateTested(model):
+        """Returns the result capture date of the analysis from the AR passed in that was last submitted
+        """
+        return max(map(lambda an: an.getResultCaptureDate(), model.getAnalyses(full_objects=True)))
+
 
 class BhpMultiReportView(MultiReportView):
     """BHP specific controller view for multi-reports
@@ -40,3 +45,4 @@ class BhpMultiReportView(MultiReportView):
         if transition is None:
             return None
         return getTransitionDate(obj, transition, return_as_datetime=True)
+
