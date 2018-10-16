@@ -326,8 +326,6 @@
   </tal:render>
 
 
-
-
 <!-- Results summary -->
   <tal:render define="reporter python:view.current_user;
                       verifiers python:model.getVerifiers();"
@@ -434,6 +432,12 @@
       </div>
     </div>
   </tal:render>
+<!-- Results summary -->
+  <tal:render define="reporter python:view.current_user;
+                      verifiers python:model.getVerifiers();"
+              condition="python: reporter and verifiers">
+    <div class="row section-participant">
+      <div class="col-sm-12">
         <table class="table table-sm">
           <tr>
             <td class="font-weight-bold">Verified by</td>
