@@ -325,10 +325,8 @@
     </div>
   </tal:render>
 
-      <div class="col-sm-12">
-
-        <h2>Results</h2>
-            <!-- RESULTS -->
+    <h2>Results</h2>
+    <!-- RESULTS -->
   <tal:render condition="python:True">
     <div class="row section-results">
       <div class="col col-sm-12">
@@ -427,6 +425,7 @@
       </div>
     </div>
   </tal:render>
+
 <!-- Results summary -->
   <tal:render define="reporter python:view.current_user;
                       verifiers python:model.getVerifiers();"
@@ -488,7 +487,7 @@
                         ** test not accredited<br/>
                         *** test sub-contracted to an accredited laboratory<br/>
                         **** test sub-contracted to a non accredited laboratory
-                    <div>
+                    </div>
                 </td>
                 <td class="green small" style="width:50%">
                     This report refers only to the samples tested.<br/>
