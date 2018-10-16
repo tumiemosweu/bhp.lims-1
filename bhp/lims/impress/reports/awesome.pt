@@ -325,13 +325,8 @@
     </div>
   </tal:render>
 
-
-<!-- Results summary -->
-  <tal:render define="reporter python:view.current_user;
-                      verifiers python:model.getVerifiers();"
-              condition="python: reporter and verifiers">
-    <div class="row section-participant">
       <div class="col-sm-12">
+
         <h2>Results</h2>
             <!-- RESULTS -->
   <tal:render condition="python:True">
