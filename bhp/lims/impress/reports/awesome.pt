@@ -324,12 +324,48 @@
       </div>
     </div>
   </tal:render>
+ <!-- Results summary -->
+  <tal:render define="reporter python:view.current_user;
+                      verifiers python:model.getVerifiers();"
+              condition="python: reporter and verifiers">
+    <div class="row section-participant">
+      <div class="col-sm-12">
+        <h2>Results</h2>
+        <table class="table table-sm">
+          <tr>
+            <td class="font-weight-bold">Verified by</td>
+            <td class="value">
+                <span tal:define="verifs python: map(lambda verifier: verifier.getFullname(), verifiers)"
+                      tal:content="python: ', '.join(verifs)"></span>
+            </td>
+            <td class="cell-spacing"></td>
+            <td class="font-weight-bold">Date Published</td>
+            <td class="value">
+                <span tal:content="python:view.to_localized_time(date_published, long_format=False)"></span>
+            </td>
+          </tr>
+          <tr>
+              <td class="font-weight-bold">Reviewed and Released by</td>
+              <td class="value">
+                  <span tal:content="reporter/fullname"></span>
+              </td>
+              <td class="cell-spacing"></td>
+              <td class="label"></td>
+              <td class="value">
+                  <span></span>
+              </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </tal:render>
 
-    <h2>Results</h2>
-    <!-- RESULTS -->
+  <!-- RESULTS -->
   <tal:render condition="python:True">
     <div class="row section-results">
       <div class="col col-sm-12">
+        <h1 i18n:translate="">Results</h1>
+
         <!-- Point of Capture -->
         <tal:poc define="analyses_by_poc python:view.get_analyses_by_poc(model);"
                  repeat="poc analyses_by_poc">
@@ -425,42 +461,6 @@
       </div>
     </div>
   </tal:render>
-
-<!-- Results summary -->
-  <tal:render define="reporter python:view.current_user;
-                      verifiers python:model.getVerifiers();"
-              condition="python: reporter and verifiers">
-    <div class="row section-participant">
-      <div class="col-sm-12">
-        <table class="table table-sm">
-          <tr>
-            <td class="font-weight-bold">Verified by</td>
-            <td class="value">
-                <span tal:define="verifs python: map(lambda verifier: verifier.getFullname(), verifiers)"
-                      tal:content="python: ', '.join(verifs)"></span>
-            </td>
-            <td class="cell-spacing"></td>
-            <td class="font-weight-bold">Date Verified</td>
-            <td class="value">
-              <span tal:content="python:view.to_localized_time(model.getDateVerified())"></span>
-            </td>
-          </tr>
-          <tr>
-              <td class="font-weight-bold">Reviewed and Released by</td>
-              <td class="value">
-                  <span tal:content="reporter/fullname"></span>
-              </td>
-              <td class="cell-spacing"></td>
-              <td class="font-weight-bold">Date Published</td>
-              <td class="value">
-                  <span tal:content="python:view.to_localized_time(date_published, long_format=False)"></span>
-              </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </tal:render>
-
   <!--  SIGNATURES -->
   <tal:render condition="python:True">
     <div class="row section-signatures">
