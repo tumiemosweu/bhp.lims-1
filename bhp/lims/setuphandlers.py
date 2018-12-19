@@ -13,6 +13,7 @@ from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
 from bhp.lims.specscalculations import get_xls_specifications
 from bika.lims import api
+from bika.lims.catalog.analysis_catalog import CATALOG_ANALYSIS_LISTING
 from bika.lims.catalog.analysisrequest_catalog import \
     CATALOG_ANALYSIS_REQUEST_LISTING
 from bika.lims.idserver import renameAfterCreation
@@ -115,6 +116,15 @@ def setupHandler(context):
 
     # Import specifications from bhp/lims/resources/results_ranges.xlsx
     import_specifications(portal)
+
+    # Assign the specifications to ARs with missing specs
+    fix_analysis_requests_without_specifications(portal)
+
+    # Remove "Results Ranges" calculation from analyses and service
+    sanitize_ranges_calculation_from_analyses(portal)
+
+    # Fix analyses from Storage category that have instruments assigned
+    fix_analyses_storage_instrument(portal)
 
     # Setup Controlpanels
     setup_controlpanels(portal)
@@ -590,8 +600,21 @@ def import_specifications(portal):
     """Creates (or updates) dynamic specifications from
     resources/results_ranges.xlsx
     """
-
     logger.info("*** Importing specifications ***")
+
+    query = dict(portal_type='SampleType')
+    brains = api.search(query, 'bika_setup_catalog')
+    sample_types = map(lambda brain: api.get_object(brain), brains)
+    for sample_type in sample_types:
+        import_specifications_for_sample_type(portal, sample_type)
+
+    apply_specifications_to_all_sampletypes(portal)
+
+    logger.info("*** Importing specifications [DONE] ***")
+
+
+def import_specifications_for_sample_type(portal, sample_type):
+    logger.info("*** Importing specs for {}".format(sample_type.Title()))
 
     def get_bs_object(xlsx_row, xlsx_keyword, portal_type, criteria):
         text_value = xlsx_row.get(xlsx_keyword, None)
@@ -615,13 +638,9 @@ def import_specifications(portal):
     raw_specifications = get_xls_specifications()
     for spec in raw_specifications:
 
-        # Valid Sample Type?
-        sample_type = get_bs_object(spec, "sample_type", "SampleType", "title")
-        if not sample_type:
-            continue
-
         # Valid Analysis Service?
-        service = get_bs_object(spec, "keyword", "AnalysisService", "getKeyword")
+        service = get_bs_object(spec, "keyword", "AnalysisService",
+                                "getKeyword")
         if not service:
             continue
 
@@ -646,13 +665,13 @@ def import_specifications(portal):
         query = dict(portal_type='AnalysisSpec', title=specs_title)
         aspec = api.search(query, 'bika_setup_catalog')
         if not aspec:
-             # Create the new AnalysisSpecs object!
-             folder = portal.bika_setup.bika_analysisspecs
-             _id = folder.invokeFactory('AnalysisSpec', id=tmpID())
-             aspec = folder[_id]
-             aspec.edit(title=specs_title)
-             aspec.unmarkCreationFlag()
-             renameAfterCreation(aspec)
+            # Create the new AnalysisSpecs object!
+            folder = portal.bika_setup.bika_analysisspecs
+            _id = folder.invokeFactory('AnalysisSpec', id=tmpID())
+            aspec = folder[_id]
+            aspec.edit(title=specs_title)
+            aspec.unmarkCreationFlag()
+            renameAfterCreation(aspec)
         elif len(aspec) > 1:
             logger.warn("More than one Analysis Specification found for {}"
                         .format(specs_title))
@@ -683,6 +702,149 @@ def import_specifications(portal):
         ranges.append(specs_dict)
         aspec.setResultsRange(ranges)
 
+
+def apply_specifications_to_all_sampletypes(portal):
+    logger.info("*** Applying specs to all sample types")
+
+    def set_xlsx_specs(senaite_spec):
+        logger.info("*** Applying specs to {}".format(senaite_spec.Title()))
+        query = dict(portal_type="Calculation", title="Ranges calculation")
+        calc = api.search(query, "bika_setup_catalog")
+        if len(calc) == 0 or len(calc) > 1:
+            logger.info("*** No calculation found [SKIP]")
+            return
+        calc_uid = api.get_uid(calc[0])
+        keywords = list()
+        raw_specifications = get_xls_specifications()
+        for spec in raw_specifications:
+            keyword = spec.get("keyword")
+            if keyword not in keywords:
+                query = dict(portal_type="AnalysisService", getKeyword=keyword)
+                brains = api.search(query, "bika_setup_catalog")
+                if len(brains) == 0 or len(brains) > 1:
+                    logger.info("*** No service found for {} [SKIP]"
+                                .format(keyword))
+                    continue
+                keywords.append(keyword)
+
+            specs_dict = {
+                'keyword': keyword,
+                'min_operator': 'geq',
+                'min': '0',
+                'max_operator': 'lt',
+                'max': '0',
+                'minpanic': '',
+                'maxpanic': '',
+                'warn_min': '',
+                'warn_max': '',
+                'hidemin': '',
+                'hidemax': '',
+                'rangecomments': '',
+                'calculation': calc_uid,
+            }
+            ranges = _api.get_field_value(senaite_spec, 'ResultsRange', [{}])
+            ranges = filter(lambda val: val.get('keyword') != keyword, ranges)
+            ranges.append(specs_dict)
+            senaite_spec.setResultsRange(ranges)
+
+    # Existing AnalysisSpec?
+    query = dict(portal_type='AnalysisSpec')
+    senaite_specs = api.search(query, 'bika_setup_catalog')
+    for senaite_spec in senaite_specs:
+        senaite_spec = api.get_object(senaite_spec)
+        if not senaite_spec.Title().endswith("calculated"):
+            continue
+        set_xlsx_specs(senaite_spec)
+
+
+def fix_analysis_requests_without_specifications(portal):
+    """Walks through all Analysis Requests not yet published and assigns the
+    suitable specification
+    """
+    logger.info("*** Updating Specifications for Analysis Requests ***")
+    query = dict(portal_type="AnalysisRequest")
+    brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
+    for brain in brains:
+        if brain.review_state in ['published', 'rejected', 'invalid']:
+            continue
+        ar = api.get_object(brain)
+        if ar.getSpecification():
+            continue
+
+        sample_type = ar.getSampleType().Title()
+        specs_title = "{} - calculated".format(sample_type)
+        query = dict(portal_type="AnalysisSpec", title=specs_title)
+        specs = api.search(query, 'bika_setup_catalog')
+        if specs:
+            ar.setSpecification(api.get_object(specs[0]))
+    logger.info("*** Updating Specifications for Analysis Requests [DONE] ***")
+
+
+def sanitize_ranges_calculation_from_analyses(portal):
+    """Walks through all Analyses not yet verified and remove the calculation
+    if is Ranges Calculation set
+    """
+    logger.info("*** Sanitizing 'Ranges Calculation' from analyses")
+    query = dict(portal_type="Calculation", title="Ranges calculation")
+    calc = api.search(query, "bika_setup_catalog")
+    if not calc:
+        logger.warn("Calculation 'Ranges calculation' not found! [SKIP]")
+    calc = api.get_object(calc[0])
+    calc_uid = api.get_uid(calc)
+
+    # Cleanup analysis services first
+    query = dict(portal_type="AnalysisService", getCalculationUID=calc_uid)
+    brains = api.search(query, "bika_setup_catalog")
+    for brain in brains:
+        service = api.get_object(brain)
+        service.setCalculation(None)
+        service.reindexObject()
+
+    # Cleanup analyses
+    query = dict()
+    brains = api.search(query, CATALOG_ANALYSIS_LISTING)
+    for brain in brains:
+        if brain.getCalculationUID != calc_uid:
+            continue
+        analysis = api.get_object(brain)
+        analysis.setCalculation(None)
+        analysis.reindexObject()
+    logger.info("*** Sanitizing 'Ranges Calculation' from analyses [DONE]")
+
+
+def fix_analyses_storage_instrument(portal):
+    """Walks through all Analyses not yet verified and if they belong to the
+    Storage requisition category, remove the instrument assignment
+    """
+    logger.info("*** Sanitizing 'Storage instrument' from analyses")
+    query = dict(portal_type="AnalysisCategory", title="Storage requisition")
+    cat = api.search(query, "bika_setup_catalog")
+    if not cat:
+        logger.warn("Category 'Storage requisition' not found [SKIP]")
+    cat_uid = api.get_uid(cat[0])
+
+    # Cleanup analysis services first
+    query = dict(portal_type="AnalysisService", getCategoryUID=cat_uid)
+    brains = api.search(query, "bika_setup_catalog")
+    for brain in brains:
+        service = api.get_object(brain)
+        if not service.getInstrument():
+            continue
+        service.setInstrument(None)
+        service.reindexObject()
+
+    # Cleanup analyses
+    query = dict(getCategoryUID=cat_uid,)
+    brains = api.search(query, CATALOG_ANALYSIS_LISTING)
+    for brain in brains:
+        if brain.review_state in ['published', 'rejected', 'invalid']:
+            continue
+        if not brain.getInstrumentUID:
+            continue
+        analysis = api.get_object(brain)
+        analysis.setInstrument(None)
+        analysis.reindexObject()
+    logger.info("*** Sanitizing 'Storage instrument' from analyses [DONE]")
 
 def update_internal_use(portal):
     """Walks through all Samples and assigns its value to False if no value set
