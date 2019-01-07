@@ -1,0 +1,36 @@
+---
+
+additional_system_packages:
+  - lpr
+  - cups-client
+  - cups
+
+# PLONE
+plone_instance_name: senaite
+plone_site_id: senaite
+plone_zodb_cache_size: 50000
+plone_timezone: "Africa/Gaborone"
+plone_always_run_buildout: yes
+plone_additional_eggs:
+  - bhp.lims
+  - senaite.api
+  - senaite.core
+  - senaite.core.supermodel
+  - senaite.impress
+  - senaite.jsonapi
+  - senaite.lims
+
+plone_sources:
+  - "bhp.lims = git git@github.com:bhp-lims/bhp.lims.git"
+  - "senaite.api = git https://github.com/senaite/senaite.api.git"
+  - "senaite.core = git https://github.com/senaite/senaite.core.git branch=1.2.9"
+  - "senaite.core.supermodel = git https://github.com/senaite/senaite.core.supermodel.git rev=v1.1.0"
+  - "senaite.impress = git https://github.com/senaite/senaite.impress.git rev=1.1.0"
+  - "senaite.jsonapi = git https://github.com/senaite/senaite.jsonapi.git"
+  - "senaite.lims = git https://github.com/senaite/senaite.lims.git rev=3137ae4b4940c50a72b30291ad45dc85b3c179ee"
+
+# SECURITY
+firewall_open_tcp_ports: [25, 80, 443]
+
+# NGINX
+nginx_keepalive_timeout: "300"

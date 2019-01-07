@@ -35,3 +35,11 @@ var
 /tags
 .mr.developer.cfg
 src/senaite.*
+
+# ANSIBLE recipe
+ansible/playbook.retry
+ansible/README.md
+ansible/roles
+ansible/senaite.ansible-playbook
+ansible/vault-password-file
+/vm

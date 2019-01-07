@@ -1,0 +1,15 @@
+---
+
+- debug:
+    msg: "******************** CUSTOM-LIMS PRE [START] *******************"
+
+- name: "Add Github.com as a known host"
+  lineinfile:
+    dest: /{{ plone_target_path }}/.ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"
+
+- debug:
+    msg: "******************** CUSTOM-LIMS PRE [DONE] ********************"
