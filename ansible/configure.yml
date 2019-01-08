@@ -1,9 +1,9 @@
 ---
 
 additional_system_packages:
-  - lpr
-  - cups-client
   - cups
+  - cups-bsd
+  - cups-client
 
 # PLONE
 plone_instance_name: senaite
