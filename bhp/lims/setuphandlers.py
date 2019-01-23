@@ -39,11 +39,13 @@ CONTROLPANELS = [
 
 INDEXES = [
     # Tuples of (catalog, id, indexed attribute, type)
-    ("bika_analysis_catalog", "getAncestorsUIDs", "getAncestorsUIDs", "KeywordIndex")
+    ("bika_analysis_catalog", "getAncestorsUIDs", "getAncestorsUIDs", "KeywordIndex"),
+    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID", "", "FieldIndex")
 ]
 
 COLUMNS = [
     # Tuples of (catalog, column name)
+    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID")
 ]
 
 CATALOGS_BY_TYPE = [

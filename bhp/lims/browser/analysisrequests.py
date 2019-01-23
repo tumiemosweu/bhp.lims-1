@@ -12,6 +12,7 @@ from bika.lims.browser.analysisrequest import AnalysisRequestsView as BaseView
 from bika.lims.browser.client import ClientAnalysisRequestsView as ClientView
 from bika.lims.utils import get_link
 
+
 class AnalysisRequestsView(BaseView):
 
     def __init__(self, context, request):
@@ -53,6 +54,8 @@ class ClientAnalysisRequestsView(ClientView):
 def init_listing(listing):
     primary = {"title": _("Primary Sample"), "sortable": True, "toggle": True}
     add_column(listing, 'primary', primary, before='getSample')
+    participant = {"title": _("Participant ID"), "sortable": True, "toggle": True}
+    add_column(listing, "getParticipantID", participant, after="getClientSampleID")
     ShipmentListingDecorator().render(listing)
 
 

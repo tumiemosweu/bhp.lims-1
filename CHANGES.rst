@@ -4,6 +4,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #187 Add Participant ID column in Analysis Requests listing
 - #186 Add Assay Date field (editable) in Analysis Request and report
 - #156 The system should allow cases to track who reviewed/verified and published the result.
 - #162 Added panic level alert messaging

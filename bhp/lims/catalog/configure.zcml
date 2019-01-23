@@ -3,5 +3,6 @@
     i18n_domain="bhp.lims">
 
   <adapter name="getAncestorsUIDs" factory=".indexers.getAncestorsUIDs"/>
+  <adapter name="getParticipantID" factory=".indexers.getParticipantID"/>
 
 </configure>
