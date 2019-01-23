@@ -16,8 +16,10 @@ from bika.lims.browser.fields.proxyfield import ExtProxyField
 from bika.lims.browser.widgets import DateTimeWidget
 from bika.lims.browser.widgets import SelectionWidget
 from bika.lims.browser.widgets.referencewidget import ReferenceWidget
-from bika.lims.fields import ExtBooleanField, ExtReferenceField
+from bika.lims.fields import ExtBooleanField, ExtReferenceField, \
+    ExtDateTimeField
 from bika.lims.interfaces import IAnalysisRequest
+from bika.lims.workflow import getTransitionDate
 from zope.component import adapts
 from zope.interface import implements
 
@@ -291,7 +293,40 @@ class AnalysisRequestSchemaExtender(object):
                          'view': 'invisible',
                          'add': 'invisible'},
             ),
-        )
+        ),
+        # This field allows to store the assay date manually
+        ExtDateTimeField(
+            'AssayDate',
+            widget=DateTimeWidget(
+                label=_('Assay Date'),
+                datepicker_nofuture=1,
+                show_time=True,
+                render_own_label=True,
+                visible={
+                    'edit': 'visible',
+                    'view': 'visible',
+                    'add': 'invisible',
+                    'header_table': 'visible',
+                    'attachment_due':    {'view': 'visible', 'edit': 'invisible'},
+                    'invalid':           {'view': 'visible', 'edit': 'invisible'},
+                    'published':         {'view': 'visible', 'edit': 'invisible'},
+                    'rejected':          {'view': 'visible', 'edit': 'invisible'},
+                    'sample_at_reception': {'view': 'visible', 'edit': 'invisible'},
+                    'sample_due':        {'view': 'visible', 'edit': 'invisible'},
+                    'sample_ordered':    {'view': 'visible', 'edit': 'invisible'},
+                    'sample_prep':       {'view': 'visible', 'edit': 'invisible'},
+                    'sample_received':   {'view': 'visible', 'edit': 'invisible'},
+                    'sample_registered': {'view': 'visible', 'edit': 'invisible'},
+                    'sample_shipped':    {'view': 'visible', 'edit': 'invisible'},
+                    'sampled':           {'view': 'visible', 'edit': 'invisible'},
+                    'scheduled_sampling':{'view': 'visible', 'edit': 'invisible'},
+                    'to_be_preserved':   {'view': 'visible', 'edit': 'invisible'},
+                    'to_be_sampled':     {'view': 'visible', 'edit': 'invisible'},
+                    'to_be_verified':    {'view': 'visible', 'edit': 'invisible'},
+                    'verified':          {'view': 'visible', 'edit': 'visible'},
+                }
+            ),
+        ),
     ]
 
     def getOrder(self, schematas):

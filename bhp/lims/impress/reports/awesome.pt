@@ -315,13 +315,18 @@
   </tal:render>
 
   <!-- Results summary -->
-  <tal:render define="reporter python:view.current_user;
-                      verifiers python:model.getVerifiers();"
-              condition="python: reporter and verifiers">
+  <tal:render define="reporter python:view.current_user or '';
+                      verifiers python:model.getVerifiers() or [];">
     <div class="row section-participant">
       <div class="col-sm-12">
         <h2>Results summary</h2>
         <table class="table table-sm">
+          <tr>
+            <td class="font-weight-bold">Assay date</td>
+            <td colspan="4" class="value">
+                <span tal:content="python:view.to_localized_time(model.AssayDate, long_format=False)"></span>
+            </td>
+          </tr>
           <tr>
             <td class="font-weight-bold">Verified by</td>
             <td class="value">
@@ -337,7 +342,7 @@
           <tr>
             <td class="font-weight-bold">Reviewed and Released by</td>
             <td class="value">
-                <span tal:content="reporter/fullname"></span>
+                <span tal:content="reporter/fullname" tal:condition="python: reporter and True or False"></span>
             </td>
             <td class="cell-spacing"></td>
             <td class="font-weight-bold">Date Published</td>

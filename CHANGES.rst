@@ -3,8 +3,9 @@ Changelog
 
 1.0.0 (unreleased)
 ------------------
-- #156 The system should allow cases to track who reviewed/verified and published the result.
 
+- #186 Add Assay Date field (editable) in Analysis Request and report
+- #156 The system should allow cases to track who reviewed/verified and published the result.
 - #162 Added panic level alert messaging
 - #160 Clinics have privileges for "process" (create partitions) transition
 - #153 Primary is not transitioning automatically to Verified state

@@ -114,4 +114,12 @@
     original="_promote_transition"
     replacement=".workflow.analysisrequest.events._promote_transition"
   />
+
+  <!-- Analyses submit transition -->
+  <monkey:patch
+    description=""
+    class="bika.lims.workflow.analysis.events"
+    original="after_submit"
+    replacement=".workflow.analysis.events.after_submit"
+  />
 </configure>

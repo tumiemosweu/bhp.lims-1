@@ -2,6 +2,9 @@
 #
 # Copyright 2018 Botswana Harvard Partnership (BHP)
 
+import time
+import transaction
+
 from Acquisition import aq_base
 from BTrees.OOBTree import OOBTree
 from Products.CMFCore.permissions import ModifyPortalContent, View, \
@@ -125,6 +128,9 @@ def setupHandler(context):
 
     # Fix analyses from Storage category that have instruments assigned
     fix_analyses_storage_instrument(portal)
+
+    # Set default Assay Date values to old Analysis Requests
+    fix_analysis_requests_assay_date(portal)
 
     # Setup Controlpanels
     setup_controlpanels(portal)
@@ -983,3 +989,36 @@ def import_profile_steps(portal):
         logger.info("Importing profile step: {}".format(step))
         setup.runImportStepFromProfile('profile-bhp.lims:default', step)
     logger.info("*** Importing profile steps [DONE]")
+
+
+def fix_analysis_requests_assay_date(portal):
+    logger.info("*** Updating Assay Date for old Analysis Requests ...")
+    query = dict(portal_type="AnalysisRequest",
+                 review_state=["published", "to_be_verified", "verified",
+                               "invalid"])
+    brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
+    total = len(brains)
+    for num, brain in enumerate(brains):
+        if num % 100 == 0:
+            logger.info("Updating Assay Date for old Analysis Requests: {}/{}"
+                        .format(num, total))
+            commit_transaction(portal)
+
+        request = api.get_object(brain)
+        if not _api.get_field_value(request, "AssayDate", None):
+            review_states = ["to_be_verified", "published", "verified"]
+            analyses = request.getAnalyses(review_state=review_states)
+            captures = map(lambda an: an.getResultCaptureDate, analyses)
+            captures = sorted(captures)
+            if captures:
+                _api.set_field_value(request, "AssayDate", captures[-1])
+    commit_transaction(portal)
+
+
+def commit_transaction(portal):
+    start = time.time()
+    logger.info("Commit transaction ...")
+    transaction.commit()
+    end = time.time()
+    logger.info("Commit transaction ... Took {:.2f}s [DONE]"
+                .format(end - start))
