@@ -35,6 +35,7 @@ var
 /tags
 .mr.developer.cfg
 src/senaite.*
+utils/*
 
 # ANSIBLE recipe
 ansible/playbook.retry
