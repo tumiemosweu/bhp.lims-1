@@ -230,6 +230,7 @@
             <span tal:content="python: view.get(analysisrequest[0],'Courier').Title()"></span>
         </h3>
         <h3>Departure Time:<span class="line_depart_time"></span></h3>
+        <h3>Date Specimen Received at Lab:<span class="line_time_specimen_received"></span></h3>
         <h3>Time Specimen Received at Lab:<span class="line_time_specimen_received"></span></h3>
         <h3>initials of lab personnel receiving the samples:<span class="line_personnel_receiving"></span></h3>
     </div>
