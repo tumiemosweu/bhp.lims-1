@@ -98,12 +98,11 @@ def is_in_panic(brain_or_object):
     """Returns true if the result for the analysis passed in is equal or below
     the min panic or equal or above max panic
     """
-    analysis = get_object(brain_or_object)
-    result = safe_getattr(analysis, "getResult", None)
+    result = safe_getattr(brain_or_object, "getResult", None)
     if not is_floatable(result):
         return False
 
-    result_range = safe_getattr(analysis, "getResultsRange", None)
+    result_range = safe_getattr(brain_or_object, "getResultsRange", None)
     if not result_range:
         return False
 

@@ -17,7 +17,7 @@
           An email alert has been sent already.
         </span>
       </p>
-      <p>
+      <p tal:condition="python: not view.is_client_contact()">
         <a href="#" id="email_popup"
            tal:attributes="class python: view.panic_email_sent and 'btn btn-warning' or 'btn btn-danger'"
            i18n:translate="">Alert clinic about panic levels exceeded</a>

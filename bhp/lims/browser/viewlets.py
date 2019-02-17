@@ -23,6 +23,11 @@ class PanicAlertViewlet(ViewletBase):
         self.panic_email_sent = ""
         self.ar_uid = ""
 
+    def is_client_contact(self):
+        """Returns whether the current user is a client contact
+        """
+        return api.is_client_contact()
+
     def render(self):
         if IAnalysisRequest.providedBy(self.context):
             self.in_panic = self.context.has_analyses_in_panic()
