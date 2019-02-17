@@ -1,20 +1,21 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
-from bhp.lims import api as bapi
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
-from bika.lims import api
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestAnalysesView as BaseAnalysesView
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestManageResultsView as BaseManageResultsView
 from bika.lims.browser.analysisrequest import \
     AnalysisRequestPublishedResults as BasePublishedResultsView
-from bika.lims.browser.analysisrequest import \
-    AnalysisRequestResultsNotRequestedView as BaseResultsNotRequestedView
 from bika.lims.browser.analysisrequest import AnalysisRequestViewView
 from bika.lims.interfaces import IAnalysisRequest
 from bika.lims.utils import encode_header
@@ -66,11 +67,13 @@ def send_panic_email(view):
                   + (": %s" % str(msg))
         addMessage(view, message, 'warning')
         return False
-    bapi.set_field_value(view.context, "PanicEmailAlertSent", True)
+    api.set_field_value(view.context, "PanicEmailAlertSent", True)
     return True
+
 
 def addMessage(view, message, msg_type="info"):
     view.context.plone_utils.addPortalMessage(message, msg_type)
+
 
 class AnalysisRequestView(AnalysisRequestViewView):
 
@@ -92,14 +95,6 @@ class AnalysisRequestManageResultsView(BaseManageResultsView):
 
     def __call__(self):
         template = super(AnalysisRequestManageResultsView, self).__call__()
-        handle_email_panic(self)
-        return template
-
-
-class AnalysisRequestResultsNotRequestedView(BaseResultsNotRequestedView):
-
-    def __call__(self):
-        template = super(AnalysisRequestResultsNotRequestedView, self).__call__()
         handle_email_panic(self)
         return template
 

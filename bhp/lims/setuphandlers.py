@@ -1,33 +1,38 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import time
-import transaction
 
-from Acquisition import aq_base
+import transaction
 from BTrees.OOBTree import OOBTree
-from Products.CMFCore.permissions import ModifyPortalContent, View, \
-    AccessContentsInformation
 from Products.CMFPlone.utils import _createObjectByType
 from Products.DCWorkflow.Guard import Guard
-from bhp.lims import api as _api
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
 from bhp.lims.specscalculations import get_xls_specifications
-from bika.lims import api
+from bika.lims.browser.analysisrequest.add2 import AR_CONFIGURATION_STORAGE
 from bika.lims.catalog.analysis_catalog import CATALOG_ANALYSIS_LISTING
 from bika.lims.catalog.analysisrequest_catalog import \
     CATALOG_ANALYSIS_REQUEST_LISTING
+from bika.lims.catalog.catalog_utilities import addZCTextIndex
 from bika.lims.idserver import renameAfterCreation
-from bika.lims.permissions import CancelAndReinstate, EditFieldResults, \
-    EditResults, EditSample, PreserveSample, ReceiveSample, ScheduleSampling
+from bika.lims.interfaces import INumberGenerator
 from bika.lims.utils import tmpID
 from zope.annotation.interfaces import IAnnotations
+from zope.component import getUtility
 
-AR_CONFIGURATION_STORAGE = "bika.lims.browser.analysisrequest.manage.add"
+# Number of objects before commit transaction
+TRANSACTION_THERESHOLD = 1000
 
-CONTROLPANELS = [
+PROFILE_STEPS = [
+    # List of profile steps to be reimported
+    "jsregistry",
+]
+
+CONTROL_PANELS = [
+    # List of items to be added in control panel, inside Setup and nav portlet
     {
         "id": "barcodeprinters",
         "type": "BarcodePrinters",
@@ -37,15 +42,10 @@ CONTROLPANELS = [
     }
 ]
 
-INDEXES = [
-    # Tuples of (catalog, id, indexed attribute, type)
-    ("bika_analysis_catalog", "getAncestorsUIDs", "getAncestorsUIDs", "KeywordIndex"),
-    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID", "", "FieldIndex")
-]
-
-COLUMNS = [
-    # Tuples of (catalog, column name)
-    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID")
+NEW_CONTENT_TYPES = [
+    # Tuples of (id, folder_id)
+    # If folder_id is None, assume folder_id is portal
+    ("couriers", "bika_setup"),
 ]
 
 CATALOGS_BY_TYPE = [
@@ -54,6 +54,212 @@ CATALOGS_BY_TYPE = [
     ("Courier", ["bika_setup_catalog"]),
 ]
 
+INDEXES = [
+    # Tuples of (catalog, index_name, index_type)
+    ("bika_analysis_catalog", "getAncestorsUIDs", "KeywordIndex"),
+    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID", "FieldIndex"),
+]
+
+COLUMNS = [
+    # Tuples of (catalog, column name)
+    (CATALOG_ANALYSIS_REQUEST_LISTING, "getParticipantID"),
+    (CATALOG_ANALYSIS_REQUEST_LISTING, "getVisit"),
+]
+
+ID_FORMATTING = [
+    # An array of dicts. Each dict represents an ID formatting configuration
+    {"portal_type": "AnalysisRequest",
+     "form": "{studyId}{sampleType}{alpha:3a2d}",
+     "prefix": "analysisrequest",
+     "sequence_type": "generated",
+     "counter_type": "",
+     "split_length": 2,
+    },
+    {"portal_type": "AnalysisRequestPartition",
+     "form": "{parent_ar_id}{seq:02d}",
+     "sequence_type": "counter",
+     "context": "parent_analysisrequest",
+     "counter_type": "backreference",
+     "counter_reference": "AnalysisRequestParentAnalysisRequest",}
+]
+
+IDS_TO_FLUSH = (
+    # List of IDFormatting prefixes used for IDs storage by NumberGenerator.
+    # The upgrade step will flush all IDs starting with this prefix
+    # Look at http://localhost:8080/senaite/ng
+    # TODO Remove after 1.3 working in production
+    "sample-",
+    "analysisrequest-",
+)
+
+NEW_ATTACHMENT_TYPES = [
+    # List of names with Attachment Types to be created
+    "Delivery",
+    "Requisition",
+]
+
+ADD_AR_FIELDS_TO_HIDE = [
+    # List of field names to not display in AR Add form
+    "Sample",
+    "RejectionReasons",
+    "Specification",
+    "InternalUse",
+    "Container",
+    "Preservation",
+]
+
+ADD_AR_FIELDS_SORTED = [
+    # List of AR field names, sorted in order for AR Add form
+    'Client',
+    'Contact',
+    'ParticipantID',
+    'OtherParticipantReference',
+    'ParticipantInitials',
+    'Gender',
+    'Visit',
+    'DateOfBirth',
+    'Fasting',
+    'ClientSampleID',
+    'DateSampled',
+    'SampleType',
+    'Volume',
+    'DefaultContainerType',
+    'Template',
+    'OtherInformation',
+    '_ARAttachment',
+    'Priority',
+    'Remarks',
+]
+
+WORKFLOWS_TO_UPDATE = {
+    "bika_ar_workflow": {
+        "permissions": (),
+        "states": {
+            # Clinic has submitted the Sample (Add form)
+            "sample_ordered": {
+                "title": "Ordered",
+                "description": "Sample ordered",
+                "transitions": ("send_to_lab",),
+                "permissions_copy_from": "sample_due",
+            },
+
+            # Clinic has sent the sample to lab
+            "sample_shipped": {
+                "title": "Shipped",
+                "description": "Sample shipped",
+                "transitions": ("deliver", ),
+                "permissions_copy_from": "sample_due",
+            },
+
+            # Reception has received the sample
+            "sample_at_reception": {
+                "title": "At reception",
+                "description": "Sample at reception",
+                "transitions": ("send_to_pot", "process", "reject"),
+                "permissions_copy_from": "sample_due",
+            },
+
+            # Reception has sent the sample to points of testing
+            "sample_due": {
+                "title": "Sent to point of testing",
+                "description": "Sample sent to point of testing",
+                "preserve_transitions": True,
+            },
+
+            # Point of testing has received the sample
+            "sample_received": {
+                "title": "At point of testing",
+                "description": "Sample at point of testing",
+                "preserve_transitions": True,
+            },
+        },
+        "transitions": {
+            # Clinic submits the sample (Add form)
+            "no_sampling_workflow": {
+                "new_state": "sample_ordered",
+            },
+
+            # Clinic sends the sample to the laboratory
+            "send_to_lab": {
+                "title": "Send to lab",
+                "new_state": "sample_shipped",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "python:here.guard_send_to_lab()",
+                }
+            },
+
+            # Reception receives the sample at the lab
+            "deliver": {
+                "title": "Receive at reception",
+                "new_state": "sample_at_reception",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "python:here.guard_deliver()",
+                }
+            },
+
+            # Reception processes the sample (partitioning)
+            "process": {
+                "title": "Process",
+                "new_state": "sample_at_reception",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "python:here.guard_process()",
+                }
+            },
+
+            # Reception sends the sample to point of testing
+            "send_to_pot": {
+                "title": "Send to point of testing",
+                "new_state": "sample_due",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "python:here.guard_send_to_pot()",
+                }
+            },
+
+            # Point of testing receives the sample
+            "receive": {
+                "title": "Receive at point of testing",
+                "new_state": "sample_received",
+                "guard": {
+                    "guard_permissions": "BIKA: Receive Sample",
+                    "guard_roles": "",
+                    "guard_expr": 'python:here.guard_receive_at_pot()'
+                }
+            },
+
+        }
+    }
+}
+
+ROLE_MAPPINGS = [
+    # List of tuples: (wf_id, query, catalog_name)
+    ("bika_ar_workflow",
+     dict(portal_type="AnalysisRequest",
+          review_state=[
+              "sample_ordered",
+              "sample_shipped",
+              "sample_at_reception",
+              "sample_due",
+              "sample_received"]),
+     CATALOG_ANALYSIS_REQUEST_LISTING)
+]
+
+OBJECTS_TO_REINDEX = [
+    # List of tuples (catalog_name, query)
+    # Reindex all analyses
+    # TODO Remove after 1.3 working in production
+    (CATALOG_ANALYSIS_LISTING, {})
+]
+
+# BHP-specific
+# List of Zebra printers (BarcodePrinter content type) to create by default
 PRINTERS = {
     "Zebra Printer Template 1": {
         "FileName": "lims-${id}.zpl",
@@ -68,14 +274,27 @@ PRINTERS = {
 ^FO315,132^A0N,20,15^FDDOB: ${DateOfBirth|to_date} ${Gender}^FS
 ^FO315,152^A0N,20,15^FD${DateSampled|to_long_date}^FS
 ^XZ"""
-        },
-    }
+    },
+}
 
-PROFILE_STEPS = [
-    "jsregistry",
+# TODO Remove after 1.3 working in production
+PROXY_FIELDS_TO_PURGE = [
+    "ParticipantID",
+    "OtherParticipantReference",
+    "ParticipantInitials",
+    "Gender",
+    "Visit",
+    "Fasting",
+    "DateOfBirth",
+    "Volume",
+    "OtherInformation",
+    "Courier",
+    "InternalUse",
+    "PrimarySample",
 ]
 
-def setupHandler(context):
+
+def setup_handler(context):
     """BHP setup handler
     """
 
@@ -93,19 +312,25 @@ def setupHandler(context):
     setup_laboratory(portal)
 
     # Add new content types
-    setup_new_content_types(portal)
+    reindex_new_content_types(portal)
 
     # Apply ID format to content types
     setup_id_formatting(portal)
 
-    # Sort AR fields (AR Add)
-    sort_ar_fields(portal)
+    # Flush IDs from NumberGenerator
+    flush_ids(portal)
+
+    # Setup custom workflow(s)
+    setup_workflows(portal)
+
+    # Update role mappings
+    update_role_mappings(portal)
 
     # Hide unused AR Fields
-    hide_unused_ar_fields(portal)
+    hide_ar_add_fields(portal)
 
-    # Setup specimen shipment (from clinic) workflow
-    setup_bhp_workflow(portal)
+    # Sort AR fields (AR Add)
+    sort_ar_add_fields(portal)
 
     # Setup Attachment Types (requisition + delivery)
     setup_attachment_types(portal)
@@ -114,10 +339,7 @@ def setupHandler(context):
     update_priorities(portal)
 
     # update analysis services (Replace % by PCT in Analysis Keywords)
-    update_services(portal)
-
-    # Update InternalUse for Samples and Analysis Requests
-    update_internal_use(portal)
+    update_services_percentage_keyword(portal)
 
     # Import specifications from bhp/lims/resources/results_ranges.xlsx
     import_specifications(portal)
@@ -135,7 +357,7 @@ def setupHandler(context):
     fix_analysis_requests_assay_date(portal)
 
     # Setup Controlpanels
-    setup_controlpanels(portal)
+    setup_control_panels(portal)
 
     # Setup printer stickers
     setup_printer_stickers(portal)
@@ -143,103 +365,121 @@ def setupHandler(context):
     # Reimport additional steps from profile
     import_profile_steps(portal)
 
+    # Disable auto-partitioning
+    disable_autopartitioning(portal)
+
+    # Compatibility with 1.3
+    migrate_to_v13(portal)
+
+    # Reindex objects
+    reindex_objects(portal)
+
     logger.info("BHP setup handler [DONE]")
 
 
 def setup_printer_stickers(portal):
     """Setup printers and stickers templates
     """
-    logger.info("*** Setup printers and stickers ***")
-    def create_printer(printer_name, portal, defaults):
-        query = dict(portal_type="BarcodePrinter", Title=printer_name)
-        printers = api.search(query, "bika_setup_catalog")
-        if printers:
-            printer = api.get_object(printers[0])
-            printer.FileName = printer_values["FileName"]
-            printer.PrinterPath = printer_values["PrinterPath"]
-            printer.Template = printer_values["Template"]
+    logger.info("Setting up printers and stickers ...")
+
+    def create_printer(folder, name, values):
+        query = dict(portal_type="BarcodePrinter", Title=name)
+        brains = api.search(query, "bika_setup_catalog")
+        if brains:
+            printer = api.get_object(brains[0])
+            printer.FileName = values["FileName"]
+            printer.PrinterPath = values["PrinterPath"]
+            printer.Template = values["Template"]
             return printer
 
         # Create a new Barcode Printer
-        folder = portal.bika_setup.barcodeprinters
         obj = _createObjectByType("BarcodePrinter", folder, tmpID())
-        obj.edit(title=printer_name,
-                 FileName=printer_values["FileName"],
-                 PrinterPath=printer_values["PrinterPath"],
-                 Template=printer_values["Template"])
+        obj.edit(title=name,
+                 FileName=values["FileName"],
+                 PrinterPath=values["PrinterPath"],
+                 Template=values["Template"])
         obj.unmarkCreationFlag()
         renameAfterCreation(obj)
 
+    printers = portal.bika_setup.barcodeprinters
     for printer_name, printer_values in PRINTERS.items():
-        create_printer(printer_name, portal, printer_values)
+        create_printer(printers, printer_name, printer_values)
+    logger.info("Setting up printers and stickers [DONE]")
 
 
 def setup_laboratory(portal):
     """Setup Laboratory
     """
-    logger.info("*** Setup Laboratory ***")
+    logger.info("Setting up Laboratory ...")
     lab = portal.bika_setup.laboratory
     lab.edit(title=_('BHP'))
     lab.reindexObject()
 
     # Set autoprinting of stickers on register
     portal.bika_setup.setAutoPrintStickers('register')
+    logger.info("Setting up Laboratory [DONE]")
 
 
-def setup_new_content_types(portal):
+def reindex_new_content_types(portal):
     """Setup new content types"""
-    logger.info("*** Setup new content types ***")
+    logger.info("Reindex new content types ...")
 
-    # Index objects - Importing through GenericSetup doesn't
-    ids = ['couriers']
-    for obj_id in ids:
-        obj = portal.bika_setup[obj_id]
+    def reindex_content_type(object_id, folder):
+        logger.info("Reindexing {}".format(object_id))
+        obj = folder[object_id]
         obj.unmarkCreationFlag()
         obj.reindexObject()
 
+    # Index objects - Importing through GenericSetup doesn't
+    for obj_id, folder_id in NEW_CONTENT_TYPES:
+        content_type_folder = folder_id and portal[folder_id] or portal
+        reindex_content_type(obj_id, content_type_folder)
 
-def setup_id_formatting(portal):
+    logger.info("Reindex new content types [DONE]")
+
+
+def setup_id_formatting(portal, format_definition=None):
     """Setup default ID formatting
     """
-    logger.info("*** Setup ID Formatting ***")
+    if not format_definition:
+        logger.info("Setting up ID formatting ...")
+        for formatting in ID_FORMATTING:
+            setup_id_formatting(portal, format_definition=formatting)
+        logger.info("Setting up ID formatting [DONE]")
+        return
+
     bs = portal.bika_setup
+    p_type = format_definition.get("portal_type", None)
+    if not p_type:
+        return
 
-    def set_format(format):
-        if 'portal_type' not in format:
-            return
-        logger.info("Applying format {} for {}".format(format.get('form',''),
-                                                       format.get('portal_type')))
-        portal_type = format['portal_type']
-        ids = list()
-        id_map = bs.getIDFormatting()
-        for record in id_map:
-            if record.get('portal_type', '') == portal_type:
-                continue
-            ids.append(record)
-        ids.append(format)
-        bs.setIDFormatting(ids)
+    form = format_definition.get("form", "")
+    if not form:
+        logger.info("Param 'form' for portal type {} not set [SKIP")
+        return
 
-    # Sample ID format
-    # Format:
-    #   08502AAA01
-    # Where:
-    #   - 085: Client's Study ID
-    #   - 02: Sample Type prefix (e.g. for Whole blood)
-    #   - AAA01: Alphanumeric numbering
-    set_format(dict(form='{studyId}{sampleType}{alpha:3a2d}',
-                    portal_type='Sample',
-                    prefix='sample',
-                    sequence_type='generated',
-                    split_length=2,
-                    value=''))
+    logger.info("Applying format '{}' for {}".format(form, p_type))
+    ids = list()
+    for record in bs.getIDFormatting():
+        if record.get('portal_type', '') == p_type:
+            continue
+        ids.append(record)
+    ids.append(format_definition)
+    bs.setIDFormatting(ids)
 
-    # Analysis Request ID format
-    set_format(dict(form='{primarySampleId}{seq:02d}',
-                    portal_type='AnalysisRequest',
-                    prefix='sample',
-                    sequence_type='generated',
-                    split_length=1,
-                    value=''))
+
+def flush_ids(portal):
+    def to_flush(key):
+        for id in IDS_TO_FLUSH:
+            if key.startswith(id):
+                return True
+        return False
+
+    number_generator = getUtility(INumberGenerator)
+    keys = filter(lambda key: to_flush(key), number_generator.keys())
+    for key in keys:
+        logger.info("Flush ID {}".format(key))
+        del number_generator.storage[key]
 
 
 def get_manage_add_storage(portal):
@@ -256,286 +496,177 @@ def update_manage_add_storage(portal, storage):
     annotation = IAnnotations(bika_setup)
     annotation[AR_CONFIGURATION_STORAGE] = storage
 
+
 def flush_manage_add_storage(portal):
     bika_setup = portal.bika_setup
     annotation = IAnnotations(bika_setup)
     if annotation[AR_CONFIGURATION_STORAGE]:
         del annotation[AR_CONFIGURATION_STORAGE]
 
-def hide_unused_ar_fields(portal):
+
+def hide_ar_add_fields(portal):
     """Hides unused fields from AR Add Form
     """
-    logger.info("*** Hiding default fields from AR Add ***")
-    field_names_to_hide = ["Sample",
-                           "RejectionReasons",
-                           "Specification",
-                           "InternalUse"]
-
+    logger.info("Hiding default fields from AR Add ...")
     storage = get_manage_add_storage(portal)
     visibility = storage.get('visibility', {}).copy()
     ordered = storage.get('order', [])
-    fields = list(set(visibility.keys() + field_names_to_hide + ordered))
+    fields = list(set(visibility.keys() + ADD_AR_FIELDS_TO_HIDE + ordered))
     for field_name in fields:
-        visibility[field_name] = field_name not in field_names_to_hide
+        visibility[field_name] = field_name not in ADD_AR_FIELDS_TO_HIDE
     storage.update({"visibility": visibility})
     update_manage_add_storage(portal, storage)
+    logger.info("Hiding default fields from AR Add [DONE]")
 
 
-def sort_ar_fields(portal):
+def sort_ar_add_fields(portal):
     """Sort AR fields from AR Add Form
     """
-    logger.info("*** Sorting fields from AR Add ***")
-    sorted=['Client',
-            'Contact',
-            'ParticipantID',
-            'OtherParticipantReference',
-            'ParticipantInitials',
-            'Gender',
-            'Visit',
-            'DateOfBirth',
-            'Fasting',
-            'ClientSampleID',
-            'DateSampled',
-            'SampleType',
-            'Volume',
-            'DefaultContainerType',
-            'Template',
-            'OtherInformation',
-            '_ARAttachment',
-            'Priority',
-            'Remarks',
-            ]
-
+    logger.info("Sorting fields from AR Add ...")
     storage = get_manage_add_storage(portal)
-    storage.update({"order": sorted})
+    storage.update({"order": ADD_AR_FIELDS_SORTED})
     update_manage_add_storage(portal, storage)
+    logger.info("Sorting fields from AR Add [DONE]")
 
 
-def setup_bhp_workflow(portal):
+def setup_workflows(portal):
+    """Setup workflows
     """
-    Setup the shipment/delivery workflow for samples:
-
-    1. Clinic submits the form      -- [no_sampling_wf] --> sample_ordered
-    2. Clinic sends the Sample      -- [send_to_lab]    --> sample_shipped
-    3. Delivery to lab              -- [deliver]        --> sample_at_reception
-    4. Process Sample               -- [process]        --> sample_at_reception
-    5. Send to Point of testing     -- [send_to_pot]    --> sample_due
-    6. Receive at Point of Testing  -- [receive]        --> received
-
-    """
-    logger.info("*** Setting up BHP custom workflow ***")
-    setup_bhp_workflow_for(portal, 'bika_sample_workflow')
-    setup_bhp_workflow_for(portal, 'bika_ar_workflow')
-
-    def update_objects(query, catalog):
-        """Bind the workflow changes to the objects previously created
-        """
-        brains = api.search(query, catalog)
-        for brain in brains:
-            update_role_mappings(brain)
-
-    # We rebind the affected workflows to the objects previously created in the
-    # system. Although not strictly necessary in a fresh instance, this is
-    # interesting for pilot testing. Once stable, this will not be required
-    # anymore and eventual changes in workflow will be done in upgrade steps.
-    review_states = ['sample_ordered', 'sample_shipped', 'sample_at_reception',
-                     'sample_due']
-    portal_types = ['AnalysisRequest', 'Sample', 'SamplePartition']
-    query = dict(review_state=review_states, portal_type=portal_types)
-    # Analysis Requests live in its own catalog, Samples and Partitions live
-    # either in portal_catalog and bika_catalog
-    update_objects(query, CATALOG_ANALYSIS_REQUEST_LISTING)
-    update_objects(query, 'bika_catalog')
-
-    # Update couriers (we want Clients to have access to them)
-    update_objects(dict(portal_type='Courier'), 'portal_catalog')
+    logger.info("Setting up workflows ...")
+    for wf_id, settings in WORKFLOWS_TO_UPDATE.items():
+        update_workflow(wf_id, settings)
+    logger.info("Setting up workflows [DONE]")
 
 
-def setup_bhp_workflow_for(portal, workflow_id):
-    wtool = api.get_tool("portal_workflow")
-    workflow = wtool.getWorkflowById(workflow_id)
+def update_workflow(workflow_id, settings):
+    logger.info("Updating workflow '{}' ...".format(workflow_id))
+    wf_tool = api.get_tool("portal_workflow")
+    workflow = wf_tool.getWorkflowById(workflow_id)
+    if not workflow:
+        logger.warn("Workflow '{}' not found [SKIP]".format(workflow_id))
+    states = settings.get("states", {})
+    for state_id, values in states.items():
+        update_workflow_state(workflow, state_id, values)
 
-    # STATUSES CREATION
-    # Ordered: Clinic submits the form --[no_sampling_wf]--> sample_ordered
-    sample_ordered = workflow.states.get('sample_ordered')
-    if not sample_ordered:
-        workflow.states.addState('sample_ordered')
-        sample_ordered = workflow.states.sample_ordered
-    sample_ordered.title = "Ordered"
-    roles = ('Manager', 'LabManager', 'LabClerk', 'Owner')
-    sample_ordered.setPermission(AccessContentsInformation, False, roles)
-    sample_ordered.setPermission(ModifyPortalContent, False, roles)
-    sample_ordered.setPermission(View, False, roles)
-    sample_ordered.setPermission(CancelAndReinstate, False, roles)
-    sample_ordered.setPermission(EditFieldResults, False, ())
-    sample_ordered.setPermission(EditResults, False, ())
-    sample_ordered.setPermission(EditSample, False, roles)
-    sample_ordered.setPermission(PreserveSample, False, ())
-    sample_ordered.setPermission(ReceiveSample, False, ())
-    sample_ordered.setPermission(ScheduleSampling, False, ())
-    sample_ordered.transitions = ('send_to_lab',)
-    workflow.transitions.no_sampling_workflow.new_state_id = 'sample_ordered'
-
-    # Shipped: Clinic sent the sample --[send_to_lab]--> sample_shipped
-    sample_shipped = workflow.states.get('sample_shipped')
-    if not sample_shipped:
-        workflow.states.addState('sample_shipped')
-        sample_shipped = workflow.states.sample_shipped
-    sample_shipped.title = "Shipped"
-    roles = ('Manager', 'LabManager', 'LabClerk', 'Owner')
-    sample_shipped.setPermission(AccessContentsInformation, False, roles)
-    sample_shipped.setPermission(ModifyPortalContent, False, roles)
-    sample_shipped.setPermission(View, False, roles)
-    sample_shipped.setPermission(CancelAndReinstate, False, roles)
-    sample_shipped.setPermission(EditFieldResults, False, ())
-    sample_shipped.setPermission(EditResults, False, ())
-    sample_shipped.setPermission(EditSample, False, roles)
-    sample_shipped.setPermission(PreserveSample, False, ())
-    sample_shipped.setPermission(ReceiveSample, False, ())
-    sample_shipped.setPermission(ScheduleSampling, False, ())
-    sample_shipped.transitions = ('deliver',)
-
-    # At reception: Sample is delivered --[deliver]--> sample_at_reception
-    at_reception = workflow.states.get('sample_at_reception')
-    if not at_reception:
-        workflow.states.addState('sample_at_reception')
-        at_reception = workflow.states.sample_at_reception
-    at_reception.title = "At reception"
-    roles = ('Manager', 'LabManager', 'LabClerk', 'Owner')
-    at_reception.setPermission(AccessContentsInformation, False, roles)
-    at_reception.setPermission(ModifyPortalContent, False, roles)
-    at_reception.setPermission(View, False, roles)
-    at_reception.setPermission(CancelAndReinstate, False, roles)
-    at_reception.setPermission(EditFieldResults, False, ())
-    at_reception.setPermission(EditResults, False, ())
-    at_reception.setPermission(EditSample, False, roles)
-    at_reception.setPermission(PreserveSample, False, ())
-    at_reception.setPermission(ReceiveSample, False, ())
-    at_reception.setPermission(ScheduleSampling, False, ())
-    at_reception.transitions = ('send_to_pot', 'process', 'reject')
-
-    # Process: Create partitions --[process]--> sample_at_reception
-    # No new state is necessary here
-
-    # Sent to PoT: Sample is sent to PoT --[send_to_pot]--> sample_due
-    workflow.states.sample_due.title = "Sent to point of testing"
-
-    # At Point of PoT: Sample is received at PoT --[receive]--> sample_received
-    workflow.states.sample_received.title = "At point of testing"
-
-    # TRANSITIONS CREATION
-    # Send to lab: ordered --> sample_shipped
-    if not workflow.transitions.get('send_to_lab'):
-        workflow.transitions.addTransition('send_to_lab')
-    send_transition = workflow.transitions.send_to_lab
-    send_transition.setProperties(
-        title='Send to Lab',
-        new_state_id='sample_shipped',
-        after_script_name='',
-        actbox_name="Send to Lab",)
-    guard_send = send_transition.guard or Guard()
-    guard_props = {'guard_permissions': 'BIKA: Add Sample',
-                   'guard_roles': '',
-                   'guard_expr': 'python:here.guard_send_to_lab()'}
-    guard_send.changeFromProperties(guard_props)
-    send_transition.guard = guard_send
-
-    # Deliver: sample_shipped --> sample_at_reception
-    if not workflow.transitions.get('deliver'):
-        workflow.transitions.addTransition('deliver')
-    deliver_transition = workflow.transitions.deliver
-    deliver_transition.setProperties(
-        title="Receive at reception",
-        new_state_id='sample_at_reception',
-        after_script_name='',
-        actbox_name="Receive at reception",)
-    guard_deliver = deliver_transition.guard or Guard()
-    guard_props = {'guard_permissions': 'BIKA: Add Sample',
-                   'guard_roles': '',
-                   'guard_expr': 'python:here.guard_deliver()'}
-    guard_deliver.changeFromProperties(guard_props)
-    deliver_transition.guard = guard_deliver
-
-    # Process: sample_at_reception --> sample_at_reception
-    if not workflow.transitions.get('process'):
-        workflow.transitions.addTransition('process')
-    process_transition = workflow.transitions.process
-    process_transition.setProperties(
-        title="Process",
-        new_state_id='sample_at_reception',
-        after_script_name='',
-        actbox_name="Process", )
-    guard_process = process_transition.guard or Guard()
-    guard_props = {'guard_permissions': 'BIKA: Add Sample',
-                   'guard_roles': '',
-                   'guard_expr': 'python:here.guard_process()'}
-    guard_process.changeFromProperties(guard_props)
-    process_transition.guard = guard_process
-
-    # Send to Pot: sample_at_reception --> sample_due
-    if not workflow.transitions.get('send_to_pot'):
-        workflow.transitions.addTransition('send_to_pot')
-    send2pot_transition = workflow.transitions.send_to_pot
-    send2pot_transition.setProperties(
-        title="Send to point of testing",
-        new_state_id='sample_due',
-        after_script_name='',
-        actbox_name="Send to point of testing", )
-    guard_send2pot = send2pot_transition.guard or Guard()
-    guard_props = {'guard_permissions': 'BIKA: Add Sample',
-                   'guard_roles': '',
-                   'guard_expr': 'python:here.guard_send_to_pot()'}
-    guard_send2pot.changeFromProperties(guard_props)
-    send2pot_transition.guard = guard_send2pot
-
-    # Receive at PoT: sample_due--> sample_received
-    workflow.transitions.receive.title="Receive at point of testing"
-    workflow.transitions.receive.actbox_name = "Receive at point of testing"
-
-    # Override guards
-    submit_transition = workflow.transitions.get('submit', None)
-    if submit_transition:
-        guard_submit = submit_transition.guard or Guard()
-        guard_props = {'guard_permissions': '',
-                       'guard_roles': '',
-                       'guard_expr': 'python:here.guard_submit()'}
-        guard_submit.changeFromProperties(guard_props)
-        submit_transition.guard = guard_submit
+    transitions = settings.get("transitions", {})
+    for transition_id, values in transitions.items():
+        update_workflow_transition(workflow, transition_id, values)
 
 
-def update_role_mappings(obj_or_brain, wfs=None, reindex=True):
-    """Update the role mappings of the given object
-    """
-    obj = api.get_object(obj_or_brain)
-    wftool = api.get_tool("portal_workflow")
-    if wfs is None:
-        wfs = get_workflows()
-    chain = wftool.getChainFor(obj)
-    for wfid in chain:
-        wf = wfs[wfid]
-        wf.updateRoleMappingsFor(obj)
-    if reindex is True:
-        obj.reindexObject(idxs=["allowedRolesAndUsers"])
-    return obj
+def update_workflow_state(workflow, status_id, settings):
+    logger.info("Updating workflow '{}', status: '{}' ..."
+                .format(workflow.id, status_id))
+
+    # Create the status (if does not exist yet)
+    new_status = workflow.states.get(status_id)
+    if not new_status:
+        workflow.states.addState(status_id)
+        new_status = workflow.states.get(status_id)
+
+    # Set basic info (title, description, etc.)
+    new_status.title = settings.get("title", new_status.title)
+    new_status.description = settings.get("description", new_status.description)
+
+    # Set transitions
+    trans = settings.get("transitions", ())
+    if settings.get("preserve_transitions", False):
+        trans = tuple(set(new_status.transitions+trans))
+    new_status.transitions = trans
+
+    # Set permissions
+    update_workflow_state_permissions(workflow, new_status, settings)
 
 
-def get_workflows():
-    """Returns a mapping of id->workflow
-    """
-    wftool = api.get_tool("portal_workflow")
-    wfs = {}
-    for wfid in wftool.objectIds():
-        wf = wftool.getWorkflowById(wfid)
-        if hasattr(aq_base(wf), "updateRoleMappingsFor"):
-            wfs[wfid] = wf
-    return wfs
+def update_workflow_state_permissions(workflow, status, settings):
+    # Copy permissions from another state?
+    permissions_copy_from = settings.get("permissions_copy_from", None)
+    if permissions_copy_from:
+        logger.info("Copying permissions from '{}' to '{}' ..."
+                    .format(permissions_copy_from, status.id))
+        copy_from_state = workflow.states.get(permissions_copy_from)
+        if not copy_from_state:
+            logger.info("State '{}' not found [SKIP]".format(copy_from_state))
+        else:
+            source_permissions = copy_from_state.permission_roles
+            for perm_id, roles in source_permissions.items():
+                logger.info("Setting permission '{}': '{}'"
+                            .format(perm_id, ', '.join(roles)))
+                status.setPermission(perm_id, False, roles)
+
+    # Override permissions
+    logger.info("Overriding permissions for '{}' ...".format(status.id))
+    state_permissions = settings.get('permissions', {})
+    if not state_permissions:
+        logger.info("No permissions set for '{}' [SKIP]".format(status.id))
+        return
+    for permission_id, roles in state_permissions.items():
+        state_roles = roles and roles or ()
+        logger.info("Setting permission '{}': '{}'"
+                    .format(permission_id, ', '.join(state_roles)))
+        status.setPermission(permission_id, False, state_roles)
+
+
+def update_workflow_transition(workflow, transition_id, settings):
+    logger.info("Updating workflow '{}', transition: '{}'"
+                .format(workflow.id, transition_id))
+    if transition_id not in workflow.transitions:
+        workflow.transitions.addTransition(transition_id)
+    transition = workflow.transitions.get(transition_id)
+    transition.setProperties(
+        title=settings.get("title"),
+        new_state_id=settings.get("new_state"),
+        after_script_name=settings.get("after_script", ""),
+        actbox_name=settings.get("action", settings.get("title"))
+    )
+    guard = transition.guard or Guard()
+    guard_props = {"guard_permissions": "",
+                   "guard_roles": "",
+                   "guard_expr": ""}
+    guard_props = settings.get("guard", guard_props)
+    guard.changeFromProperties(guard_props)
+    transition.guard = guard
+
+
+def update_role_mappings(portal):
+    logger.info("Updating role mappings ...")
+    processed = dict()
+    for rm_query in ROLE_MAPPINGS:
+        wf_tool = api.get_tool("portal_workflow")
+        wf_id = rm_query[0]
+        workflow = wf_tool.getWorkflowById(wf_id)
+
+        query = rm_query[1].copy()
+        exclude_states = []
+        if 'not_review_state' in query:
+            exclude_states = query.get('not_review_state', [])
+            del query['not_review_state']
+
+        brains = api.search(query, rm_query[2])
+        total = len(brains)
+        for num, brain in enumerate(brains):
+            if num % 100 == 0:
+                logger.info("Updating role mappings '{0}': {1}/{2}"
+                            .format(wf_id, num, total))
+            if api.get_uid(brain) in processed.get(wf_id, []):
+                # Already processed, skip
+                continue
+
+            if api.get_workflow_status_of(brain) in exclude_states:
+                # We explicitely want to exclude objs in these states
+                continue
+
+            workflow.updateRoleMappingsFor(api.get_object(brain))
+            if wf_id not in processed:
+                processed[wf_id] = []
+            processed[wf_id].append(api.get_uid(brain))
+    logger.info("Updating role mappings [DONE]")
 
 
 def update_priorities(portal):
     """Reset the priorities of created ARs to those defined for BHP
     1: Urgent, 3: Routine, 5: STAT
     """
-    logger.info("*** Restoring Priorities ***")
+    logger.info("Restoring Priorities ...")
     query = dict(portal_type='AnalysisRequest')
     brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
     for brain in brains:
@@ -548,10 +679,13 @@ def update_priorities(portal):
             # Low --> STAT
             obj.setPriority(5)
             obj.reindexObject()
+    logger.info("Restoring Priorities [DONE]")
 
 
-def update_services(portal):
-    logger.info("*** Updating services ***")
+def update_services_percentage_keyword(portal):
+    """Replace "%" character in Analysis Service keywords by "_PCT"
+    """
+    logger.info("Updating services ...")
     for service in portal.bika_setup.bika_analysisservices.values():
         keyword = service.Schema().getField('Keyword').get(service)
         if '%' in keyword:
@@ -559,20 +693,20 @@ def update_services(portal):
             logger.info("Replaced Analysis Keyword: {}".format(keyword))
             service.setKeyword(keyword)
             service.reindexObject()
+    logger.info("Updating services [DONE]")
 
 
 def setup_attachment_types(portal):
     """Creates two attachment types. One for requisition and another one for
     the checklist delivery report
     """
-    logger.info("*** Creating custom Attachment Types ***")
-    new_attachment_types = ['Requisition', 'Delivery']
+    logger.info("Creating custom Attachment Types ...")
+    new_attachment_types = list(NEW_ATTACHMENT_TYPES)
     folder = portal.bika_setup.bika_attachmenttypes
     for attachment in folder.values():
         if attachment.Title() in new_attachment_types:
             new_attachment_types.remove(attachment.Title())
 
-    atts_uids = {}
     for new_attachment in new_attachment_types:
         obj = _createObjectByType("AttachmentType", folder, tmpID())
         obj.edit(title=new_attachment,
@@ -580,9 +714,8 @@ def setup_attachment_types(portal):
         obj.unmarkCreationFlag()
         renameAfterCreation(obj)
 
-
-    logger.info("*** Assign Attachment Types to requisition and rejection ***")
-    new_attachment_types = {'Requisition': None, 'Delivery': None}
+    logger.info("Assign Attachment Types to requisition and rejection")
+    new_attachment_types = dict.fromkeys(NEW_ATTACHMENT_TYPES)
     for attachment in folder.values():
         for att_type in new_attachment_types.keys():
             if attachment.Title() == att_type:
@@ -602,13 +735,14 @@ def setup_attachment_types(portal):
                     attachment.setAttachmentType(val)
                     attachment.setReportOption('i') # Ignore in report
                     break
+    logger.info("Creating custom Attachment Types [DONE]")
 
 
 def import_specifications(portal):
     """Creates (or updates) dynamic specifications from
     resources/results_ranges.xlsx
     """
-    logger.info("*** Importing specifications ***")
+    logger.info("Importing specifications ...")
 
     query = dict(portal_type='SampleType')
     brains = api.search(query, 'bika_setup_catalog')
@@ -618,11 +752,11 @@ def import_specifications(portal):
 
     apply_specifications_to_all_sampletypes(portal)
 
-    logger.info("*** Importing specifications [DONE] ***")
+    logger.info("Importing specifications [DONE]")
 
 
 def import_specifications_for_sample_type(portal, sample_type):
-    logger.info("*** Importing specs for {}".format(sample_type.Title()))
+    logger.info("Importing specs for {}".format(sample_type.Title()))
 
     def get_bs_object(xlsx_row, xlsx_keyword, portal_type, criteria):
         text_value = xlsx_row.get(xlsx_keyword, None)
@@ -705,21 +839,21 @@ def import_specifications_for_sample_type(portal, sample_type):
             'rangecomments': '',
             'calculation': api.get_uid(calc),
         }
-        ranges = _api.get_field_value(aspec, 'ResultsRange', [{}])
+        ranges = api.get_field_value(aspec, 'ResultsRange', [{}])
         ranges = filter(lambda val: val.get('keyword') != keyword, ranges)
         ranges.append(specs_dict)
         aspec.setResultsRange(ranges)
 
 
 def apply_specifications_to_all_sampletypes(portal):
-    logger.info("*** Applying specs to all sample types")
+    logger.info("Applying specs to all sample types ...")
 
     def set_xlsx_specs(senaite_spec):
-        logger.info("*** Applying specs to {}".format(senaite_spec.Title()))
+        logger.info("Applying specs to {}".format(senaite_spec.Title()))
         query = dict(portal_type="Calculation", title="Ranges calculation")
         calc = api.search(query, "bika_setup_catalog")
         if len(calc) == 0 or len(calc) > 1:
-            logger.info("*** No calculation found [SKIP]")
+            logger.info("No calculation found [SKIP]")
             return
         calc_uid = api.get_uid(calc[0])
         keywords = list()
@@ -730,7 +864,7 @@ def apply_specifications_to_all_sampletypes(portal):
                 query = dict(portal_type="AnalysisService", getKeyword=keyword)
                 brains = api.search(query, "bika_setup_catalog")
                 if len(brains) == 0 or len(brains) > 1:
-                    logger.info("*** No service found for {} [SKIP]"
+                    logger.info("No service found for {} [SKIP]"
                                 .format(keyword))
                     continue
                 keywords.append(keyword)
@@ -750,7 +884,7 @@ def apply_specifications_to_all_sampletypes(portal):
                 'rangecomments': '',
                 'calculation': calc_uid,
             }
-            ranges = _api.get_field_value(senaite_spec, 'ResultsRange', [{}])
+            ranges = api.get_field_value(senaite_spec, 'ResultsRange', [{}])
             ranges = filter(lambda val: val.get('keyword') != keyword, ranges)
             ranges.append(specs_dict)
             senaite_spec.setResultsRange(ranges)
@@ -763,13 +897,14 @@ def apply_specifications_to_all_sampletypes(portal):
         if not senaite_spec.Title().endswith("calculated"):
             continue
         set_xlsx_specs(senaite_spec)
+    logger.info("Applying specs to all sample types [DONE]")
 
 
 def fix_analysis_requests_without_specifications(portal):
     """Walks through all Analysis Requests not yet published and assigns the
     suitable specification
     """
-    logger.info("*** Updating Specifications for Analysis Requests ***")
+    logger.info("Updating Specifications for Analysis Requests")
     query = dict(portal_type="AnalysisRequest")
     brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
     for brain in brains:
@@ -785,14 +920,14 @@ def fix_analysis_requests_without_specifications(portal):
         specs = api.search(query, 'bika_setup_catalog')
         if specs:
             ar.setSpecification(api.get_object(specs[0]))
-    logger.info("*** Updating Specifications for Analysis Requests [DONE] ***")
+    logger.info("Updating Specifications for Analysis Requests [DONE]")
 
 
 def sanitize_ranges_calculation_from_analyses(portal):
     """Walks through all Analyses not yet verified and remove the calculation
     if is Ranges Calculation set
     """
-    logger.info("*** Sanitizing 'Ranges Calculation' from analyses")
+    logger.info("Sanitizing 'Ranges Calculation' from analyses")
     query = dict(portal_type="Calculation", title="Ranges calculation")
     calc = api.search(query, "bika_setup_catalog")
     if not calc:
@@ -817,14 +952,14 @@ def sanitize_ranges_calculation_from_analyses(portal):
         analysis = api.get_object(brain)
         analysis.setCalculation(None)
         analysis.reindexObject()
-    logger.info("*** Sanitizing 'Ranges Calculation' from analyses [DONE]")
+    logger.info("Sanitizing 'Ranges Calculation' from analyses [DONE]")
 
 
 def fix_analyses_storage_instrument(portal):
     """Walks through all Analyses not yet verified and if they belong to the
     Storage requisition category, remove the instrument assignment
     """
-    logger.info("*** Sanitizing 'Storage instrument' from analyses")
+    logger.info("Sanitizing 'Storage instrument' from analyses")
     query = dict(portal_type="AnalysisCategory", title="Storage requisition")
     cat = api.search(query, "bika_setup_catalog")
     if not cat:
@@ -852,23 +987,13 @@ def fix_analyses_storage_instrument(portal):
         analysis = api.get_object(brain)
         analysis.setInstrument(None)
         analysis.reindexObject()
-    logger.info("*** Sanitizing 'Storage instrument' from analyses [DONE]")
-
-def update_internal_use(portal):
-    """Walks through all Samples and assigns its value to False if no value set
-    """
-    logger.info("*** Updating InternalUse field on Samples/ARs ***")
-    samples = api.search(dict(portal_type="Sample"), "bika_catalog")
-    for sample in samples:
-        sample = api.get_object(sample)
-        if _api.get_field_value(sample, "InternalUse", None) is None:
-            _api.set_field_value(sample, "InternalUse", False)
+    logger.info("Sanitizing 'Storage instrument' from analyses [DONE]")
 
 
-def setup_controlpanels(portal):
+def setup_control_panels(portal):
     """Setup Plone control and Senaite management panels
     """
-    logger.info("*** Setup Controlpanels ***")
+    logger.info("Setup Control panels ...")
 
     # get the bika_setup object
     bika_setup = api.get_bika_setup()
@@ -883,7 +1008,7 @@ def setup_controlpanels(portal):
                 return n
         return -1
 
-    for item in CONTROLPANELS:
+    for item in CONTROL_PANELS:
         id = item.get("id")
         type = item.get("type")
         title = item.get("title")
@@ -920,14 +1045,13 @@ def setup_controlpanels(portal):
 
         # reindex the object to render it properly in the navigation portlet
         panel.reindexObject()
+    logger.info("Setup Control panels [DONE]")
 
 
 def setup_catalogs(portal):
     """Setup Plone catalogs
     """
-    logger.info("*** Setup Catalogs ***")
-
-    # Add InstrumentDomains to the right catalogs
+    logger.info("Setup Catalogs ...")
 
     # Setup catalogs by type
     for type_name, catalogs in CATALOGS_BY_TYPE:
@@ -937,64 +1061,69 @@ def setup_catalogs(portal):
         # get the desired catalogs this type should be in
         desired_catalogs = map(api.get_tool, catalogs)
         # check if the catalogs changed for this portal_type
-        if set(current_catalogs).difference(desired_catalogs):
+        if set(desired_catalogs).difference(current_catalogs):
             # fetch the brains to reindex
             brains = api.search({"portal_type": type_name})
             # updated the catalogs
             at.setCatalogsByType(type_name, catalogs)
-            logger.info("*** Assign '%s' type to Catalogs %s" %
+            logger.info("Assign '%s' type to Catalogs %s" %
                         (type_name, catalogs))
             for brain in brains:
                 obj = api.get_object(brain)
-                logger.info("*** Reindexing '%s'" % repr(obj))
+                logger.info("Reindexing '%s'" % repr(obj))
                 obj.reindexObject()
 
     # Setup catalog indexes
     to_index = []
-    for catalog, name, attribute, meta_type in INDEXES:
+    for catalog, name, meta_type in INDEXES:
         c = api.get_tool(catalog)
         indexes = c.indexes()
         if name in indexes:
-            logger.info("*** Index '%s' already in Catalog [SKIP]" % name)
+            logger.info("Index '%s' already in Catalog [SKIP]" % name)
             continue
 
-        logger.info("*** Adding Index '%s' for field '%s' to catalog ..."
-                    % (meta_type, name))
-        c.addIndex(name, meta_type)
+        logger.info("Adding Index '%s' for field '%s' to catalog '%s"
+                    % (meta_type, name, catalog))
+        if meta_type == "ZCTextIndex":
+            addZCTextIndex(c, name)
+        else:
+            c.addIndex(name, meta_type)
         to_index.append((c, name))
-        logger.info("*** Added Index '%s' for field '%s' to catalog [DONE]"
+        logger.info("Added Index '%s' for field '%s' to catalog [DONE]"
                     % (meta_type, name))
 
     for catalog, name in to_index:
-        logger.info("*** Indexing new index '%s' ..." % name)
+        logger.info("Indexing new index '%s' ..." % name)
         catalog.manage_reindexIndex(name)
-        logger.info("*** Indexing new index '%s' [DONE]" % name)
+        logger.info("Indexing new index '%s' [DONE]" % name)
 
     # Setup catalog metadata columns
     for catalog, name in COLUMNS:
         c = api.get_tool(catalog)
         if name not in c.schema():
-            logger.info("*** Adding Column '%s' to catalog '%s' ..."
+            logger.info("Adding Column '%s' to catalog '%s' ..."
                         % (name, catalog))
             c.addColumn(name)
-            logger.info("*** Added Column '%s' to catalog '%s' [DONE]"
+            logger.info("Added Column '%s' to catalog '%s' [DONE]"
                         % (name, catalog))
         else:
-            logger.info("*** Column '%s' already in catalog '%s'  [SKIP]"
+            logger.info("Column '%s' already in catalog '%s'  [SKIP]"
                         % (name, catalog))
             continue
+    logger.info("Setup Catalogs [DONE]")
+
 
 def import_profile_steps(portal):
-    logger.info("*** Importing profile steps...")
+    logger.info("Importing profile steps...")
     setup = portal.portal_setup
     for step in PROFILE_STEPS:
         logger.info("Importing profile step: {}".format(step))
         setup.runImportStepFromProfile('profile-bhp.lims:default', step)
-    logger.info("*** Importing profile steps [DONE]")
+    logger.info("Importing profile steps [DONE]")
 
 
 def fix_analysis_requests_assay_date(portal):
-    logger.info("*** Updating Assay Date for old Analysis Requests ...")
+    logger.info("Updating Assay Date for old Analysis Requests ...")
     query = dict(portal_type="AnalysisRequest",
                  review_state=["published", "to_be_verified", "verified",
                                "invalid"])
@@ -1004,17 +1133,20 @@ def fix_analysis_requests_assay_date(portal):
         if num % 100 == 0:
             logger.info("Updating Assay Date for old Analysis Requests: {}/{}"
                         .format(num, total))
+        if num % TRANSACTION_THERESHOLD == 0:
             commit_transaction(portal)
 
         request = api.get_object(brain)
-        if not _api.get_field_value(request, "AssayDate", None):
+        if not api.get_field_value(request, "AssayDate", None):
             review_states = ["to_be_verified", "published", "verified"]
             analyses = request.getAnalyses(review_state=review_states)
             captures = map(lambda an: an.getResultCaptureDate, analyses)
             captures = sorted(captures)
             if captures:
-                _api.set_field_value(request, "AssayDate", captures[-1])
+                api.set_field_value(request, "AssayDate", captures[-1])
+                request.reindexObject()
     commit_transaction(portal)
+    logger.info("Updating Assay Date for old Analysis Requests [DONE]")
 
 
 def commit_transaction(portal):
@@ -1024,3 +1156,133 @@ def commit_transaction(portal):
     end = time.time()
     logger.info("Commit transaction ... Took {:.2f}s [DONE]"
                 .format(end - start))
+
+
+# TODO Remove after 1.3 working in production
+def migrate_to_v13(portal):
+    """Required steps to migrate from version 1.2.9.1 to v1.3
+    """
+    # Port Analysis Request Proxy Fields
+    port_analysis_request_proxy_fields(portal)
+
+    # ParentAnalysisRequest' is the field for partition-parent relationship
+    sync_partitions(portal)
+
+
+# TODO Remove after 1.3 working in production
+def port_analysis_request_proxy_fields(portal):
+    logger.info("Purging Analysis Request Proxy Fields ...")
+
+    def set_value(analysis_request, field_name, field_value):
+        ar_field = analysis_request.Schema()[field_name]
+        if ar_field.type == 'uidreference':
+            if api.is_object(field_value):
+                field_value = api.get_uid(field_value)
+            elif not api.is_uid(field_value):
+                return
+        ar_field.set(analysis_request, field_value)
+
+    def unlink_proxy_fields(sample_brain, analysis_request=None):
+        processed_fields = []
+        sample_obj = api.get_object(sample_brain)
+        if not analysis_request:
+            for ar in sample_obj.getAnalysisRequests():
+                processed_fields.extend(unlink_proxy_fields(sample_brain, ar))
+                ar.reindexObject()
+            return list(set(processed_fields))
+
+        for field_id in PROXY_FIELDS_TO_PURGE:
+            field_value = None
+            try:
+                field = sample_obj.Schema().getField(field_id)
+                field_value = field.get(sample_obj)
+            except AttributeError:
+                logger.warn("Field {} not found for {}"
+                            .format(field_id, sample_obj.getId()))
+            if not field_value:
+                continue
+            set_value(analysis_request, field_id, field_value)
+            processed_fields.append(field_id)
+        return processed_fields
+
+    start = time.time()
+
+    query = dict(portal_type="Sample")
+    brains = api.search(query, "bika_catalog")
+    total = len(brains)
+    need_commit = False
+    for num, brain in enumerate(brains):
+        if num % 10 == 0:
+            logger.info("Purging Analysis Requests' ProxyField: {}/{}"
+                        .format(num, total))
+        if num % TRANSACTION_THERESHOLD == 0:
+            commit_transaction(portal)
+        unlink_proxy_fields(brain)
+
+    commit_transaction(portal)
+    end = time.time()
+    logger.info("Purging Analysis Request Proxy Fields took {:.2f}s"
+                .format(end - start))
+
+
+# TODO Remove after 1.3 working in production
+def sync_partitions(portal):
+    """In previous versions, PrimaryAnalysisRequest was used as the Reference
+    Field to set the relationship between partitions and primary ARs. In 1.3,
+    this functionality is already provided by core, but through field
+    ParentAnalysisRequest.
+    """
+    logger.info("Syncing partitions ...")
+    query = dict(portal_type="AnalysisRequest")
+    brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
+    total = len(brains)
+    for num, brain in enumerate(brains):
+        if num % 100 == 0:
+            logger.info("Syncing partitions from old Analysis Requests: {}/{}"
+                        .format(num, total))
+        if num % TRANSACTION_THERESHOLD == 0:
+            commit_transaction(portal)
+
+        request = api.get_object(brain)
+        primary = api.get_field_value(request, "PrimaryAnalysisRequest", None)
+        if primary:
+            request.setParentAnalysisRequest(primary)
+            request.reindexObject()
+    commit_transaction(portal)
+    logger.info("Syncing partitions [DONE]")
+
+
+def reindex_objects(portal):
+    logger.info("Reindexing objects ...")
+    def reindex(query, catalog_name, job_num):
+        brains = api.search(query, catalog_name)
+        total = len(brains)
+        for num, brain in enumerate(brains):
+            if num % 100 == 0:
+                logger.info(
+                    "Reindexing objects (job {}): {}/{}"
+                    .format(job_num, num, total))
+            if num % TRANSACTION_THERESHOLD == 0:
+                commit_transaction(portal)
+            obj = api.get_object(brain)
+            obj.reindexObject()
+        commit_transaction(portal)
+
+    count = 1
+    steps = len(OBJECTS_TO_REINDEX)
+    for catalog_name, query in OBJECTS_TO_REINDEX:
+        logger.info("Reindexing objects {} jobs of {}...".format(count, steps))
+        reindex(query, catalog_name, count)
+        count += 1
+
+    logger.info("Reindexing objects [DONE]")
+
+
+def disable_autopartitioning(portal):
+    logger.info("Disabling auto-partitioning for Templates ...")
+    query = dict(portal_type="ARTemplate")
+    for template in api.search(query, "portal_catalog"):
+        template = api.get_object(template)
+        template.setAutoPartition(False)
+        template.reindexObject()
+    logger.info("Disabling auto-partitioning for Templates [DONE]")

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.Registry import registerWidget
 from bhp.lims.browser.analysisspecification import AnalysisSpecificationView
-from bika.lims import api
 from bika.lims.browser.widgets.analysisspecificationwidget import \
     AnalysisSpecificationWidget as BaseWidget
 

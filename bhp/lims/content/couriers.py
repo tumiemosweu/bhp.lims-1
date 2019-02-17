@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from Products.ATContentTypes.content import schemata
 from Products.Archetypes.public import registerType
-from bhp.lims.interfaces import ICouriers
 from bhp.lims.config import PRODUCT_NAME
-from plone.app.folder.folder import ATFolder, ATFolderSchema
+from bhp.lims.interfaces import ICouriers
+from plone.app.folder.folder import ATFolder
+from plone.app.folder.folder import ATFolderSchema
 from zope.interface.declarations import implements
 
 schema = ATFolderSchema.copy()

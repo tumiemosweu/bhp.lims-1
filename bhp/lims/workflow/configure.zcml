@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="bhp">
+
+  <!-- After event handler for Analysis Requests (aka Samples) -->
+  <subscriber
+    for="bika.lims.interfaces.IAnalysisRequest
+         Products.DCWorkflow.interfaces.IAfterTransitionEvent"
+    handler=".analysisrequest.AfterTransitionEventHandler" />
+
+  <!-- After event handler for routine analyses transitions -->
+  <subscriber
+    for="bika.lims.interfaces.IRoutineAnalysis
+         Products.DCWorkflow.interfaces.IAfterTransitionEvent"
+    handler=".analysis.AfterTransitionEventHandler" />
+
+</configure>

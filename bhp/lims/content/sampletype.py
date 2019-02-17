@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
 from Products.Archetypes.references import HoldingReference
 from archetypes.schemaextender.interfaces import IOrderableSchemaExtender
 from bika.lims import bikaMessageFactory as _

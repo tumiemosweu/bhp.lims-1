@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import unittest2 as unittest
 from bika.lims.testing import BASE_LAYER_FIXTURE

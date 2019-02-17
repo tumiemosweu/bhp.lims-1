@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from AccessControl import ClassSecurityInfo
 from bhp.lims.config import PRODUCT_NAME

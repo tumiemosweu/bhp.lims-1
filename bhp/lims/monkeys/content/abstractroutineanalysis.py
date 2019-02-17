@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
-from bika.lims import api
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
+from bhp.lims import api
 from bika.lims.content.analysisspec import ResultsRangeDict
 
 def getResultsRange(self):

@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
 import plone.protect
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from bhp.lims import api as _api
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
-from bika.lims import api
 from bika.lims.browser import BrowserView
 from bika.lims.interfaces import IAnalysisRequest
 from plone.app.layout.globals.interfaces import IViewView
@@ -80,7 +83,7 @@ class EmailPopupView(BrowserView):
         analyses = ar.getAnalyses(full_objects=True, retracted=False)
         messages = list()
         for analysis in analyses:
-            if not _api.is_in_panic(analysis):
+            if not api.is_in_panic(analysis):
                 continue
             messages.append(
                 "- {0}, {1}: {2} {3}".format(analysis.Title(),

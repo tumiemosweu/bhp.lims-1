@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from AccessControl import ClassSecurityInfo
+from Products.Archetypes.public import registerType
 from bhp.lims.config import PRODUCT_NAME
 from bhp.lims.interfaces import ICourier
 from bika.lims.content.person import Person
-from Products.Archetypes.public import registerType
 from zope.interface import implements
 
 schema = Person.schema.copy()

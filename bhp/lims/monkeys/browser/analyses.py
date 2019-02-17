@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
+from bhp.lims import api
 from bika.lims import bikaMessageFactory as _
-from bika.lims import api
 from bika.lims.api.analysis import is_out_of_range, get_formatted_interval
 from bika.lims.utils import get_image
+
 
 def _folder_item_specifications(self, analysis_brain, item):
     """Set the results range to the item passed in"""

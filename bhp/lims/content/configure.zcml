@@ -21,7 +21,4 @@
     <!-- Analysis Specifications -->
     <adapter factory=".analysisspec.AnalysisSpecSchemaModifier" />
 
-    <!-- AR Template -->
-    <adapter factory=".artemplate.ARTemplateSchemaModifier" />
-
 </configure>

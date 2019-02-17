@@ -270,7 +270,7 @@
 
   <!-- Sample information -->
   <tal:render condition="python:True"
-              define="sample model/Sample;
+              define="sample model;
                       samptype sample/SampleType">
     <div class="row section-participant">
       <div class="col-sm-12">

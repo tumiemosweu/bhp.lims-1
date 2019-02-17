@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from archetypes.schemaextender.interfaces import ISchemaModifier
 from bhp.lims import bhpMessageFactory as _
@@ -13,6 +12,7 @@ from bika.lims.interfaces import IAnalysisSpec
 from zope.component import adapts
 from zope.interface import implements
 
+
 class AnalysisSpecSchemaModifier(object):
     adapts(IAnalysisSpec)
     implements(ISchemaModifier)
@@ -22,7 +22,6 @@ class AnalysisSpecSchemaModifier(object):
 
     def fiddle(self, schema):
         # Add panic alert range columns
-
         validator = AnalysisSpecificationsValidator()
         schema['ResultsRange'].subfields += ('minpanic', 'maxpanic', 'calculation')
         schema['ResultsRange'].subfield_validators['minpanic'] = validator

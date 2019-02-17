@@ -4,120 +4,115 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="bhp">
 
-  <plone:static
-      directory="stickers"
-      type="stickers"
-      name="BHP Stickers"/>
+  <!--
+  Register static directory for JS/CSS/Image resources
+  -->
+  <browser:resourceDirectory
+    name="bhp.lims.static"
+    directory="static"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
-  <browser:page
-      for="bika.lims.interfaces.IAnalysisRequest"
-      name="requisition"
-      class="bhp.lims.browser.requisition.RequisitionFormPdf"
-      permission="zope2.View"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+  <!-- Include child packages -->
+  <include package=".workflow"/>
 
+  <!--
+  AR Barcodes Print View
+  -->
   <browser:page
-      for="bika.lims.interfaces.IAnalysisRequestsFolder"
-      name="requisition"
-      class="bhp.lims.browser.requisition.RequisitionFormPdf"
-      permission="zope2.View"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+    for="*"
+    name="generate_barcodes"
+    class=".generate_barcodes.GenerateBarcodesView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <!-- Override core's stickers view -->
+  <browser:page
+    for="*"
+    name="sticker"
+    class=".generate_barcodes.GenerateBarcodesView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <!-- Display Barcodes print view after partition magic -->
+  <browser:page
+    for="*"
+    name="print_view"
+    class=".generate_barcodes.GenerateBarcodesView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!--
+  Requisition report creation (PDF)
+  -->
   <browser:page
-      for="bika.lims.interfaces.IAnalysisRequest"
-      name="delivery"
-      class="bhp.lims.browser.delivery.DeliveryFormPdf"
-      permission="zope2.View"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="requisition"
+    class=".requisition.RequisitionFormPdf"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <browser:page
+    for="bika.lims.interfaces.IAnalysisRequestsFolder"
+    name="requisition"
+    class=".requisition.RequisitionFormPdf"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!--
+  Delivery (checklist) report (PDF)
+  -->
   <browser:page
-      for="bika.lims.interfaces.IAnalysisRequestsFolder"
-      name="delivery"
-      class="bhp.lims.browser.delivery.DeliveryFormPdf"
-      permission="zope2.View"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="delivery"
+    class=".delivery.DeliveryFormPdf"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <browser:page
+    for="bika.lims.interfaces.IAnalysisRequestsFolder"
+    name="delivery"
+    class=".delivery.DeliveryFormPdf"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!--
+  Courier Shipment View
+  -->
   <browser:page
-      for="bhp.lims.interfaces.ICouriers"
-      name="folder_view"
-      class="bhp.lims.browser.courierfolder.CourierFolderContentsView"
-      permission="bika.lims.ManageBika"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+    for="*"
+    name="courier_shipment"
+    class=".courier_shipment.CourierShipmentView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
-  <!-- Main Analysis Requests View -->
+  <!--
+  Couriers Listing
+  -->
   <browser:page
-      for="bika.lims.interfaces.IAnalysisRequestsFolder"
-      name="base_view"
-      class="bhp.lims.browser.analysisrequests.AnalysisRequestsView"
-      permission="bika.lims.ManageAnalysisRequests"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <!-- Client Analysis Requests View -->
-  <browser:page
-      for="bika.lims.interfaces.IClient"
-      name="base_view"
-      class="bhp.lims.browser.analysisrequests.ClientAnalysisRequestsView"
-      permission="zope2.View"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <!-- Client Samples View -->
-  <browser:page
-      for="bika.lims.interfaces.IClient"
-      name="samples"
-      class="bhp.lims.browser.samples.ClientSamplesView"
-      permission="zope2.View"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
+    for="bhp.lims.interfaces.ICouriers"
+    name="folder_view"
+    class=".courierfolder.CourierFolderContentsView"
+    permission="bika.lims.ManageBika"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
-  <!-- AR Barcode View -->
-  <browser:page
-      for="*"
-      name="generate_barcodes"
-      class=".generate_barcodes.GenerateBarcodesView"
-      permission="bika.lims.ManageAnalysisRequests"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
+  <!--
+  Samples listing with additional filters and columns
+  -->
+  <subscriber
+    for="bika.lims.browser.analysisrequest.AnalysisRequestsView
+         bika.lims.interfaces.IAnalysisRequestsFolder"
+    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    factory=".analysisrequests.AnalysisRequestsListingViewAdapter" />
+  <subscriber
+    for="bika.lims.browser.analysisrequest.AnalysisRequestsView
+         bika.lims.interfaces.IClient"
+    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    factory=".analysisrequests.AnalysisRequestsListingViewAdapter" />
+  <subscriber
+    for="bika.lims.browser.analysisrequest.AnalysisRequestsView
+         bika.lims.interfaces.IBatch"
+    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    factory=".analysisrequests.AnalysisRequestsListingViewAdapter" />
 
-  <!-- AR Partition Magic View -->
-  <browser:page
-      for="*"
-      name="partition_magic"
-      class=".partition_magic.PartitionMagicView"
-      permission="bika.lims.ManageAnalysisRequests"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
-  <browser:page
-      for="*"
-      name="sticker"
-      class=".generate_barcodes.GenerateBarcodesView"
-      permission="zope2.View"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
-  <browser:page
-      for="*"
-      name="print_view"
-      class=".generate_barcodes.GenerateBarcodesView"
-      permission="zope2.View"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
-  <!-- Corier Shipment View -->
-  <browser:page
-      for="*"
-      name="courier_shipment"
-      class=".courier_shipment.CourierShipmentView"
-      permission="zope2.View"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
-  <!-- Show Panic Level Alert viewlet -->
+  <!--
+  Panic Level Alert viewlet
+  -->
   <browser:viewlet
     for="bika.lims.interfaces.IAnalysisRequest"
     name=".panic_alert_viewlet"
@@ -125,46 +120,11 @@
     manager="plone.app.layout.viewlets.interfaces.IAboveContent"
     template="templates/panic_alert_viewlet.pt"
     permission="bika.lims.ManageAnalysisRequests"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
-  <!-- Override AR's views to manage Panic Level Email -->
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="base_view"
-    class=".analysisrequest.AnalysisRequestView"
-    permission="bika.lims.ManageAnalysisRequests"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="analyses"
-    class=".analysisrequest.AnalysisRequestAnalysesView"
-    permission="bika.lims.permissions.AddAnalysis"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="manage_results"
-    class=".analysisrequest.AnalysisRequestManageResultsView"
-    permission="bika.lims.EditResults"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="not_requested"
-    class=".analysisrequest.AnalysisRequestResultsNotRequestedView"
-    permission="bika.lims.ManageAnalysisRequests"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-  <browser:page
-    for="bika.lims.interfaces.IAnalysisRequest"
-    name="published_results"
-    class=".analysisrequest.AnalysisRequestPublishedResultsView"
-    permission="bika.lims.ManageAnalysisRequests"
-    layer="bhp.lims.interfaces.IBhpLIMS"
-  />
- 
+  <!--
+  Panic Level Alert Email view
+  -->
   <browser:page
     for="*"
     name="email_popup"
@@ -173,19 +133,42 @@
     layer="bhp.lims.interfaces.IBhpLIMS"
   />
 
-  <!-- Register static directory for JS/CSS/Image resources -->
-  <browser:resourceDirectory
-      name="bhp.lims.static"
-      directory="static"
-      layer="bhp.lims.interfaces.IBhpLIMS"
-  />
-
+  <!--
+  Handle Panic Level Alert Email in Sample views
+  -->
   <browser:page
-      for="*"
-      name="getsampletypes"
-      class=".sampletype.ajaxGetSampleTypes"
-      permission="zope.Public"
-      layer="bika.lims.interfaces.IBikaLIMS"
-  />
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="base_view"
+    class=".analysisrequest.AnalysisRequestView"
+    permission="bika.lims.ManageAnalysisRequests"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <browser:page
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="analyses"
+    class=".analysisrequest.AnalysisRequestAnalysesView"
+    permission="bika.lims.permissions.AddAnalysis"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <browser:page
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="manage_results"
+    class=".analysisrequest.AnalysisRequestManageResultsView"
+    permission="bika.lims.EditResults"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+  <browser:page
+    for="bika.lims.interfaces.IAnalysisRequest"
+    name="published_results"
+    class=".analysisrequest.AnalysisRequestPublishedResultsView"
+    permission="bika.lims.ManageAnalysisRequests"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+
+  <!--
+  Analysis Specifications Widget
+  -->
+  <browser:page
+    for="*"
+    name="analysis_spec_widget_view"
+    class="bhp.lims.browser.analysisspecification.AnalysisSpecificationView"
+    permission="zope.Public"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
 
 </configure>

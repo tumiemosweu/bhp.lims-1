@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
-import re
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
-from bhp.lims import logger
-from DateTime import DateTime
 from Products.ATContentTypes.utils import DT2dt
-from bika.lims import api as bapi
+from bhp.lims import logger
+from bika.lims.api import *
+from bika.lims.utils import render_html_attributes
 from dateutil.relativedelta import relativedelta
 
 _marker = object()
@@ -16,12 +14,12 @@ _marker = object()
 def get_field_value(instance, field_name, default=_marker):
     """Returns the value of a Schema field from the instance passed in
     """
-    instance = bapi.get_object(instance)
+    instance = get_object(instance)
     field = instance.Schema() and instance.Schema().getField(field_name) or None
     if not field:
         if default is not _marker:
             return default
-        bapi.fail("No field {} found for {}".format(field_name, repr(instance)))
+        fail("No field {} found for {}".format(field_name, repr(instance)))
     return instance.Schema().getField(field_name).get(instance)
 
 
@@ -32,10 +30,10 @@ def set_field_value(instance, field_name, value):
         logger.warn("Assignment of id is not allowed")
         return
     logger.info("Field {} = {}".format(field_name, repr(value)))
-    instance = bapi.get_object(instance)
+    instance = get_object(instance)
     field = instance.Schema() and instance.Schema().getField(field_name) or None
     if not field:
-        bapi.fail("No field {} found for {}".format(field_name, repr(instance)))
+        fail("No field {} found for {}".format(field_name, repr(instance)))
     field.set(instance, value)
 
 
@@ -45,12 +43,12 @@ def get_age(datetime_from, datetime_to=None):
     if not datetime_to:
         datetime_to = DateTime()
 
-    if not bapi.is_date(datetime_from) or not bapi.is_date(datetime_to):
-        bapi.fail("Only DateTime and datetype types are supported")
+    if not is_date(datetime_from) or not is_date(datetime_to):
+        fail("Only DateTime and datetype types are supported")
 
 
-    dfrom = DT2dt(bapi.to_date(datetime_from)).replace(tzinfo=None)
-    dto = DT2dt(bapi.to_date(datetime_to)).replace(tzinfo=None)
+    dfrom = DT2dt(to_date(datetime_from)).replace(tzinfo=None)
+    dto = DT2dt(to_date(datetime_to)).replace(tzinfo=None)
 
     diff = relativedelta(dto, dfrom)
     return (diff.years, diff.months, diff.days)
@@ -59,12 +57,12 @@ def get_age(datetime_from, datetime_to=None):
 def to_age_str(years=0, months=0, days=0):
     """Returns a string representation of an age
     """
-    if not bapi.is_floatable(years):
-        bapi.fail("Years are not floatable")
-    if not bapi.is_floatable(months):
-        bapi.fail("Months are not floatabla")
-    if not bapi.is_floatable(days):
-        bapi.fail("Days are not floatable")
+    if not is_floatable(years):
+        fail("Years are not floatable")
+    if not is_floatable(months):
+        fail("Months are not floatabla")
+    if not is_floatable(days):
+        fail("Days are not floatable")
 
     age_arr = list()
     if years:
@@ -86,7 +84,7 @@ def to_age(age):
         if not matches:
             return 0
         age_val = matches[0]
-        if age_val and bapi.is_floatable(age_val):
+        if age_val and is_floatable(age_val):
             return age_val.strip()
         return 0
 
@@ -100,21 +98,21 @@ def is_in_panic(brain_or_object):
     """Returns true if the result for the analysis passed in is equal or below
     the min panic or equal or above max panic
     """
-    analysis = bapi.get_object(brain_or_object)
-    result = bapi.safe_getattr(analysis, "getResult", None)
-    if not bapi.is_floatable(result):
+    analysis = get_object(brain_or_object)
+    result = safe_getattr(analysis, "getResult", None)
+    if not is_floatable(result):
         return False
 
-    result_range = bapi.safe_getattr(analysis, "getResultsRange", None)
+    result_range = safe_getattr(analysis, "getResultsRange", None)
     if not result_range:
         return False
 
     # Out of range. Check if minpanic or maxpanic are set
-    result = bapi.to_float(result)
+    result = to_float(result)
     panic_min = result_range.get('minpanic', "")
     panic_max = result_range.get('maxpanic', "")
-    panic_min = bapi.is_floatable(panic_min) and panic_min or None
-    panic_max = bapi.is_floatable(panic_max) and panic_max or None
+    panic_min = is_floatable(panic_min) and panic_min or None
+    panic_max = is_floatable(panic_max) and panic_max or None
 
     if panic_min is not None and result <= panic_min:
         return True
@@ -122,3 +120,23 @@ def is_in_panic(brain_or_object):
     if panic_max is not None and result >= panic_max:
         return True
     return False
+
+
+def is_client_contact():
+    """Returns whether the current user is a Client contact
+    """
+    return get_current_client() is not None
+
+
+def get_html_image(name, **kwargs):
+    """Returns a well-formed img html
+    :param name: file name of the image
+    :param kwargs: additional attributes and values
+    :return: a well-formed html img
+    """
+    if not name:
+        return ""
+    portal_url = get_url(get_portal())
+    attr = render_html_attributes(**kwargs)
+    html = '<img src="{}/++resource++bhp.lims.static/images/{}" {}/>'
+    return html.format(portal_url, name, attr)

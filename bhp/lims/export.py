@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import collections
 from StringIO import StringIO
 
 from bhp.lims import logger
-from bika.lims import api
+from bhp.lims import api
 from DateTime import DateTime
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook

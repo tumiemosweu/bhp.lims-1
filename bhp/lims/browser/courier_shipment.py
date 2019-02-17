@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from collections import OrderedDict
-from bhp.lims.browser.delivery import generate_delivery_pdf
+
+from DateTime import DateTime
+from Products.Five.browser import BrowserView
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
-from bika.lims import api
-from Products.Five.browser import BrowserView
-from DateTime import DateTime
-from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from bhp.lims.browser.delivery import generate_delivery_pdf
+from bika.lims import workflow as wf
 
 ALLOWED_STATES = ["sample_ordered"]
 
@@ -22,6 +26,7 @@ class CourierShipmentView(BrowserView):
         self.context = context
         self.request = request
         self.back_url = self.context.absolute_url()
+        self.redirect_url = ""
 
     def __call__(self):
         form = self.request.form
@@ -55,6 +60,8 @@ class CourierShipmentView(BrowserView):
                 message = _("Sent {} to Lab".format(
                     ", ".join(sent_object_ids)))
 
+                # TODO Redirect the user to back_url while downloading pdf
+
                 # Generate the delivery report
                 pdf = generate_delivery_pdf(self.context, sent_objects)
                 return self.response_pdf(pdf)
@@ -84,8 +91,7 @@ class CourierShipmentView(BrowserView):
         ar.getField("Courier").set(ar, courier)
 
         # 2. Transition the AR to shipped
-        wf_tool = api.get_tool("portal_workflow")
-        wf_tool.doActionFor(ar, "send_to_lab", wf_id="bika_ar_workflow")
+        wf.doActionFor(ar, "send_to_lab")
 
         return True
 

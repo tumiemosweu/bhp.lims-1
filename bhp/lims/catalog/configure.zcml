@@ -1,8 +1,8 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
-    i18n_domain="bhp.lims">
+    i18n_domain="bhp">
 
-  <adapter name="getAncestorsUIDs" factory=".indexers.getAncestorsUIDs"/>
   <adapter name="getParticipantID" factory=".indexers.getParticipantID"/>
+  <adapter name="getVisit" factory=".indexers.getVisit"/>
 
 </configure>

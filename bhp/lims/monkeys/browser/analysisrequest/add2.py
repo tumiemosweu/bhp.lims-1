@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
-from bhp.lims.setuphandlers import sort_ar_fields
-from bhp.lims.setuphandlers import hide_unused_ar_fields
-from bika.lims import api
+from bhp.lims import api
+from bhp.lims import setuphandlers as handler
 
 
 def flush(self):
     """Restore the sorting and visibility of fields from AR Add form
     """
     portal = api.get_portal()
-    sort_ar_fields(portal)
-    hide_unused_ar_fields(portal)
+    handler.sort_ar_add_fields(portal)
+    handler.hide_ar_add_fields(portal)

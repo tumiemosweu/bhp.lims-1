@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import os
 import re
 import subprocess
 from collections import OrderedDict
 
-from bhp.lims import bhpMessageFactory as _
-from bhp.lims import logger
-from bhp.lims.decorators import returns_super_model
-from bika.lims import api
 from DateTime import DateTime
 from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from bhp.lims import api
+from bhp.lims import bhpMessageFactory as _
+from bhp.lims import logger
+from bhp.lims.decorators import returns_super_model
 
 
 class GenerateBarcodesView(BrowserView):

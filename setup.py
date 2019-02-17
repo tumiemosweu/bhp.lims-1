@@ -30,9 +30,10 @@ setup(
         "archetypes.schemaextender",
         "pyBarcode",
         "senaite.core.supermodel>=1.0.0",
-        "senaite.core>=1.2.8",
+        "senaite.core>=1.3",
         "senaite.lims>=1.2.2",
         "setuptools",
+        "PyPDF2",
     ],
     extras_require={
         "test": [

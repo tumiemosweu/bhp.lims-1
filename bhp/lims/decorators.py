@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from functools import wraps
 
-from senaite import api
+from bhp.lims import api
 from senaite.core.supermodel.interfaces import ISuperModel
 from zope.component import queryAdapter
 

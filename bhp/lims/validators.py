@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import os
 
 from Products.validation import validation
 from Products.validation.interfaces.IValidator import IValidator
-from bhp.lims import logger
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
-from bika.lims import api
+from bhp.lims import logger
 from bika.lims import bikaMessageFactory as _b
 from bika.lims.validators import \
     AnalysisSpecificationsValidator as BaseValidator

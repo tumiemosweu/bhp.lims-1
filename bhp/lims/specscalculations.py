@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import os
 
-from bhp.lims import api as _api
+from bhp.lims import api
+from bhp.lims import logger
 from bhp.lims.config import GENDERS
-from bika.lims import api
 from bika.lims.interfaces.analysis import IRequestAnalysis
 from openpyxl.reader.excel import load_workbook
 
@@ -30,17 +29,16 @@ def get_specification_for(spec, default=_marker):
         api.fail("Type {} not supported: ".format(repr(analysis)))
 
     request = analysis.getRequest()
-    gender = _api.get_field_value(request, "Gender")
+    gender = api.get_field_value(request, "Gender")
     if not gender or gender.lower() not in GENDERS.keys():
         # If no gender is specified or not a valid value, assume any
         gender = 'a'
 
-    dob = _api.get_field_value(request, "DateOfBirth")
+    dob = api.get_field_value(request, "DateOfBirth")
     sampled = request.getDateSampled()
     if not dob or not sampled:
-        if default is not _marker:
-            return default
-        api.fail("No DateSampled or Date of Birth set")
+        logger.error("No DateSampled/ DateOfBirth set. Ignore if 1.3 upgrade")
+        return {}
 
     specification = request.getSpecification()
     if not specification:
@@ -50,7 +48,7 @@ def get_specification_for(spec, default=_marker):
             return default
         api.fail("Specification not set for request {}".format(request.id))
 
-    years, months, days = _api.get_age(dob, sampled)
+    years, months, days = api.get_age(dob, sampled)
     return get_analysisspec(analysis_keyword=analysis.getKeyword(),
                             gender=gender, years=years, months=months,
                             days=days)
@@ -88,8 +86,8 @@ def get_analysisspec(analysis_keyword, gender, years, months, days):
 
         age_low = spec.get('age_low', '0d')
         age_to = spec.get('age_to', '200y')
-        y_from, m_from, d_from = _api.to_age(age_low)
-        y_to, m_to, d_to = _api.to_age(age_to)
+        y_from, m_from, d_from = api.to_age(age_low)
+        y_to, m_to, d_to = api.to_age(age_to)
 
         num_from = to_number(y_from, m_from, d_from)
         num_to = to_number(y_to, m_to, d_to)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 from Products.Archetypes.Widget import BooleanWidget
 from Products.Archetypes.public import StringWidget

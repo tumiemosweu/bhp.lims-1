@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
-#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
 import os
 import tempfile
 from base64 import b64encode
+
 from Products.CMFPlone.utils import _createObjectByType
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from barcode.writer import ImageWriter
 from barcode import Code39
+from barcode.writer import ImageWriter
+from bhp.lims import api
 from bhp.lims import logger
-from bika.lims import api
 from bika.lims.browser import BrowserView
 from bika.lims.idserver import renameAfterCreation
 from bika.lims.interfaces import IAnalysisRequest, ISample

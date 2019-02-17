@@ -25,11 +25,19 @@
     replacement=".browser.analyses._folder_item_specifications"
   />
 
+  <!-- Override idserver functions to add "studyId" in AnalysisRequest ID -->
   <monkey:patch
     description=""
     class="bika.lims.idserver"
     original="get_variables"
     replacement=".idserver.get_variables"
+  />
+  <!-- Inject "studyId" param in number generator view (ng) -->
+  <monkey:patch
+    description=""
+    class="bika.lims.browser.idserver.view.IDServerView"
+    original="get_next_id_for"
+    replacement=".browser.idserver.get_next_id_for"
   />
 
   <monkey:patch
@@ -38,48 +46,14 @@
     original="flush"
     replacement=".browser.analysisrequest.add2.flush"
   />
-   <!-- Overriding the email body -->
-   <monkey:patch
-    description=""
-    class="bika.lims.browser.analysisrequest.workflow.AnalysisRequestWorkflowAction"
-    original="notify_ar_retract"
-    replacement=".browser.analysisrequest.workflow.notify_ar_retract"
-  />
 
-  <!-- Primary Sample-->
+  <!-- Take workflow steps (shipped, received, sent_to_pot, received_at_pot)
+    in Samples listing' progress bar -->
   <monkey:patch
     description=""
-    class="bika.lims.content.analysisrequest.AnalysisRequest"
-    original="getPrimarySample"
-    ignoreOriginal="True"
-    replacement=".content.analysisrequest.getPrimarySample"
-  />
-
-  <!-- Primary Analysis Request-->
-  <monkey:patch
-    description=""
-    class="bika.lims.content.analysisrequest.AnalysisRequest"
-    original="getPrimaryAnalysisRequest"
-    ignoreOriginal="True"
-    replacement=".content.analysisrequest.getPrimaryAnalysisRequest"
-  />
-
-  <!-- Analysis Requests ancestors -->
-  <monkey:patch
-    description=""
-    class="bika.lims.content.analysisrequest.AnalysisRequest"
-    original="getAncestors"
-    ignoreOriginal="True"
-    replacement=".content.analysisrequest.getAncestors"
-  />
-
-  <!-- Analysis Requests descendants -->
-  <monkey:patch
-    description=""
-    class="bika.lims.content.analysisrequest.AnalysisRequest"
-    original="getDescendants"
-    ignoreOriginal="True"
-    replacement=".content.analysisrequest.getDescendants"
+    class="bika.lims.browser.analysisrequest.analysisrequests.AnalysisRequestsView"
+    original="get_progress_percentage"
+    replacement=".browser.analysisrequest.analysisrequests.get_progress_percentage"
   />
 
   <!-- Analysis Request's has_analyses_in_panic -->
@@ -91,35 +65,4 @@
     replacement=".content.analysisrequest.has_analyses_in_panic"
   />
 
-  <!-- Mask analyses with those from descendants -->
-  <monkey:patch
-    description=""
-    class="bika.lims.browser.fields.aranalysesfield.ARAnalysesField"
-    original="get"
-    replacement=".browser.fields.aranalysesfield.get"
-  />
-
-  <!-- Mask analyses with those from descendants -->
-  <monkey:patch
-    description=""
-    class="Products.ZCatalog.ZCatalog.ZCatalog"
-    original="searchResults"
-    replacement=".zcatalog.searchResults"
-  />
-
-  <!-- Promote after transitions to ARs ancestors -->
-  <monkey:patch
-    description=""
-    class="bika.lims.workflow.analysisrequest.events"
-    original="_promote_transition"
-    replacement=".workflow.analysisrequest.events._promote_transition"
-  />
-
-  <!-- Analyses submit transition -->
-  <monkey:patch
-    description=""
-    class="bika.lims.workflow.analysis.events"
-    original="after_submit"
-    replacement=".workflow.analysis.events.after_submit"
-  />
 </configure>

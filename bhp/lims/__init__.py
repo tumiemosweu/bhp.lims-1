@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import logging
 
@@ -13,14 +13,20 @@ from zope.i18nmessageid import MessageFactory
 
 from config import PRODUCT_NAME
 
+# Make bhp.* modules importable by through-the-web
+# https://docs.plone.org/develop/plone/security/sandboxing.html
+# https://docs.zope.org/zope2/zdgbook/Security.html
+# This allows Script python (e.g. guards from skins) to access to these modules.
+# To provide access to a module inside of a package, we need to provide security
+# declarations for all of the the packages and sub-packages along the path
+# used to access the module. Thus, all the modules from the path passed in to
+# `allow_module` will be available.
+allow_module('bhp.lims.workflow.analysisrequest.guards')
+
 # Defining a Message Factory for when this product is internationalized.
 bhpMessageFactory = MessageFactory('bhp')
-
 logger = logging.getLogger(PRODUCT_NAME)
 
-allow_module('AccessControl')
-allow_module('bhp.lims')
-allow_module('bika.lims')
 
 def initialize(context):
     """Initializer called when used as a Zope 2 product."""

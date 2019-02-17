@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
-from bhp.lims import api as _api
+from bhp.lims import api
 from bhp.lims import logger
+from bika.lims.workflow import getTransitionDate
 from senaite.impress.analysisrequest.reportview import MultiReportView
 from senaite.impress.analysisrequest.reportview import SingleReportView
-from bika.lims.workflow import getTransitionDate
 
 
 class BhpSingleReportView(SingleReportView):
@@ -17,7 +19,7 @@ class BhpSingleReportView(SingleReportView):
         super(BhpSingleReportView, self).__init__(model, request)
 
     def get_age_str(self, model):
-        years, months, days = _api.get_age(model.DateOfBirth, model.DateSampled)
+        years, months, days = api.get_age(model.DateOfBirth, model.DateSampled)
         years = years and "{}y".format(years) or None
         months = months and "{}m".format(months) or None
         days = days and "{}d".format(days) or None
@@ -27,7 +29,8 @@ class BhpSingleReportView(SingleReportView):
     def getDateTested(model):
         """Returns the result capture date of the analysis from the AR passed in that was last submitted
         """
-        return max(map(lambda an: an.getResultCaptureDate(), model.getAnalyses(full_objects=True)))
+        return max(map(lambda an: an.getResultCaptureDate(),
+                       model.getAnalyses(full_objects=True)))
 
 
 class BhpMultiReportView(MultiReportView):

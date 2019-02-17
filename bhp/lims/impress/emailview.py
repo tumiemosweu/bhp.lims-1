@@ -1,4 +1,8 @@
-from senaite.impress.emailview import EmailView as BaseEmailView
+# -*- coding: utf-8 -*-
+#
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
+from bika.lims.browser.publish.emailview import EmailView as BaseEmailView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 
 

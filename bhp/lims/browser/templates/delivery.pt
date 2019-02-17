@@ -199,8 +199,7 @@
           <th>S</th>
       </tr>
       <tal:ar repeat="analysisrequest view/analysis_requests">
-      <tr tal:define="sample python: analysisrequest.getSample();
-                      client python:analysisrequest.aq_parent"><td>
+      <tr tal:define="client python:analysisrequest.aq_parent"><td>
             <div>
                 <span tal:content="python: analysisrequest.id"></span>
             </div>
@@ -212,10 +211,10 @@
               <span tal:content="python: view.get(analysisrequest, 'ParticipantID')"></span>
           </td>
           <td tal:content="python: view.get(analysisrequest, 'Gender').upper()"></td>
-          <td tal:content="python: view.get(sample, 'DateSampled').strftime('%d/%m/%y')"></td>
+          <td tal:content="python: view.get(analysisrequest, 'DateSampled').strftime('%d/%m/%y')"></td>
           <td tal:content="python: view.get(analysisrequest, 'Visit').upper()"></td>
           <td><div class="checkbox"></div></td>
-          <td><div class="checkbox"></div></td>
+          <td><div class="checkbox"></div></td>F
       </tr>
       </tal:ar>
     </table>

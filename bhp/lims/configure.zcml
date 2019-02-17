@@ -3,8 +3,6 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:cmf="http://namespaces.zope.org/cmf"
-    xmlns:i18n="http://namespaces.zope.org/i18n"
-    xmlns:zcml="http://namespaces.zope.org/zcml"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     i18n_domain="bhp">
 
@@ -18,17 +16,14 @@
   <!-- Filesystem directory view -->
   <cmf:registerDirectory name="skins" directory="skins" recursive="True"/>
 
-  <!-- Overrides -->
-  <includeOverrides file="overrides.zcml" />
-
   <!-- Package includes -->
-  <include package=".content"/>
   <include package=".browser"/>
-  <include package=".setupdata"/>
-  <include package=".monkeys"/>
+  <include package=".catalog"/>
+  <include package=".content"/>
   <include package=".controlpanel"/>
   <include package=".impress"/>
-  <include package=".catalog"/>
+  <include package=".monkeys"/>
+  <include package=".workflow"/>
 
   <!-- LIMS Export -->
   <browser:page
@@ -60,10 +55,10 @@
 
   <!-- Run Setup Script -->
   <genericsetup:importStep
-      name="bhp.lims.setupHandler"
+      name="bhp.lims.setup_handler"
       title="BHP LIMS: Run Setup Handler"
       description="Run various configuration actions"
-      handler="bhp.lims.setuphandlers.setupHandler">
+      handler="bhp.lims.setuphandlers.setup_handler">
       <depends name="content" />
   </genericsetup:importStep>
 

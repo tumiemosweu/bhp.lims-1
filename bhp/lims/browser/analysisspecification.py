@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 import collections
 
+from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
-from bika.lims import api
 from bika.lims.browser.widgets.analysisspecificationwidget import \
     AnalysisSpecificationView as BaseView
 

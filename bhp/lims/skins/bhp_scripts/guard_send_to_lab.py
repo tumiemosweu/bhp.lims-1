@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
 ## Script (Python) "guard_send_to_lab"
 ##bind container=container
@@ -12,5 +12,5 @@
 ##title=
 ##
 
-from bhp.lims.workflow.guards import guard_send_to_lab
+from bhp.lims.workflow.analysisrequest.guards import guard_send_to_lab
 return guard_send_to_lab(context)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 Botswana Harvard Partnership (BHP)
+# Copyright 2018-2019 Botswana Harvard Partnership (BHP)
+
 from senaite.impress.interfaces import ILayer as ISenaiteImpressLayer
 from senaite.lims.interfaces import ISenaiteLIMS
 from zope.interface import Interface
