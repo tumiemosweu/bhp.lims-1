@@ -54,8 +54,8 @@ http://localhost:8080/senaite/@@API/senaite/v1/search?portal_type=ARTemplate&cat
 Pick the "uid", "getSampleTypeUID" from the desired Template
 E.g:
 
-- uid of "Complete Blood Count (CBC)": 59b525f060164edf94f1334748f81d1d
-- Sample Type uid of "Complete Blood Count (CBC)": f2f039f6920645318e53dd160a3f9642
+- uid of "Complete Blood Count (CBC)": `59b525f060164edf94f1334748f81d1d`
+- Sample Type uid of "Complete Blood Count (CBC)": `f2f039f6920645318e53dd160a3f9642`
 
 #### Get the Sample Type
 
