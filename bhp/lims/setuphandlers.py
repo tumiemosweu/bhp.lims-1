@@ -155,7 +155,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_at_reception": {
                 "title": "At reception",
                 "description": "Sample at reception",
-                "transitions": ("send_to_pot", "process", "reject"),
+                "transitions": ("send_to_pot", "process", "reject", "store"),
                 "permissions_copy_from": "sample_due",
             },
 
