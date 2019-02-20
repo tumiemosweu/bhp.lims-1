@@ -20,6 +20,13 @@ class AnalysisRequestsListingViewAdapter(object):
         self.listing = listing
         self.context = context
 
+    def get_priority_order(self):
+        """Returns a number that represents the order of priority of this
+        subscriber adapter over other subscriber adapters for same context
+        and listing view
+        """
+        return 9999
+
     def before_render(self):
         # Additional columns
         self.add_columns()
@@ -65,10 +72,11 @@ class AnalysisRequestsListingViewAdapter(object):
     def add_review_states(self):
         """Adds bhp-specific review states (filter buttons) in the listing
         """
-        # Get the transitions that come by default for sample_due
+        # Get the columns and custom actions set by default for sample_due
         sample_due = filter(lambda o: o["id"] == "sample_due",
                             self.listing.review_states)[0]
-        base_custom_transitions = sample_due.get("custom_transitions", [])
+        default_columns = sample_due["columns"]
+        default_actions = sample_due.get("custom_transitions", [])
 
         bhp_review_states = [
             # Sample ordered
@@ -79,8 +87,8 @@ class AnalysisRequestsListingViewAdapter(object):
                  "sort_on": "created",
                  "sort_order": "descending"},
              "transitions": [],
-             "custom_transitions": base_custom_transitions,
-             "columns": self.listing.columns.keys(), },
+             "custom_transitions": default_actions,
+             "columns": default_columns, },
 
             # Sample shipped
             {"id": "sample_shipped",
@@ -90,8 +98,8 @@ class AnalysisRequestsListingViewAdapter(object):
                  "sort_on": "created",
                  "sort_order": "descending"},
              "transitions": [],
-             "custom_transitions": base_custom_transitions,
-             "columns": self.listing.columns.keys(), },
+             "custom_transitions": default_actions,
+             "columns": default_columns, },
 
             # Sample at reception
             {"id": "sample_at_reception",
@@ -101,8 +109,8 @@ class AnalysisRequestsListingViewAdapter(object):
                  "sort_on": "created",
                  "sort_order": "descending"},
              "transitions": [],
-             "custom_transitions": base_custom_transitions,
-             "columns": self.listing.columns.keys(),}
+             "custom_transitions": default_actions,
+             "columns": default_columns,}
         ]
 
         # Add the review states
@@ -120,7 +128,6 @@ class AnalysisRequestsListingViewAdapter(object):
                 review_states = tuple(set(review_states))
                 rv_filter["contentFilter"]["review_state"] = review_states
                 break
-
 
     def add_custom_transitions(self):
         """Adds custom transitions to review_states
