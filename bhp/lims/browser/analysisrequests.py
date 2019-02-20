@@ -20,13 +20,6 @@ class AnalysisRequestsListingViewAdapter(object):
         self.listing = listing
         self.context = context
 
-    def get_priority_order(self):
-        """Returns a number that represents the order of priority of this
-        subscriber adapter over other subscriber adapters for same context
-        and listing view
-        """
-        return 9999
-
     def before_render(self):
         # Additional columns
         self.add_columns()
