@@ -30,7 +30,7 @@
       for="*"
       name="lims_export"
       class=".export.ExportView"
-      permission="bika.lims.ManageAnalysisRequests"
+      permission="senaite.core.permissions.ManageAnalysisRequests"
       layer="bhp.lims.interfaces.IBhpLIMS"
       />
 

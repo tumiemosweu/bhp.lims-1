@@ -4,14 +4,14 @@
     xmlns:i18n="http://namespaces.zope.org/i18n"
     i18n_domain="bhp">
 
-  <!-- Needed for bika.lims.ManageBika permission -->
+  <!-- Needed for senaite.core.permissions.ManageBika permission -->
   <include package="bika.lims" file="permissions.zcml" />
 
   <browser:page
       for="bhp.lims.interfaces.IBarcodePrinters"
       name="folder_view"
       class=".barcodeprinters.BarcodePrinterListing"
-      permission="bika.lims.ManageBika"
+      permission="senaite.core.permissions.ManageBika"
       layer="bhp.lims.interfaces.IBhpLIMS" />
 
 </configure>

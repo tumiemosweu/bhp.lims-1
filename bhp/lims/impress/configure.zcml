@@ -28,7 +28,7 @@
       for="bika.lims.interfaces.IClient"
       name="email"
       class=".emailview.EmailView"
-      permission="bika.lims.ManageAnalysisRequests"
+      permission="senaite.core.permissions.ManageAnalysisRequests"
       layer="bhp.lims.interfaces.IBhpLIMS"
   />
 

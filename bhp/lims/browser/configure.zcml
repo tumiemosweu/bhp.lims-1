@@ -88,7 +88,7 @@
     for="bhp.lims.interfaces.ICouriers"
     name="folder_view"
     class=".courierfolder.CourierFolderContentsView"
-    permission="bika.lims.ManageBika"
+    permission="senaite.core.permissions.ManageBika"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
@@ -119,7 +119,7 @@
     class=".viewlets.PanicAlertViewlet"
     manager="plone.app.layout.viewlets.interfaces.IAboveContent"
     template="templates/panic_alert_viewlet.pt"
-    permission="bika.lims.ManageAnalysisRequests"
+    permission="senaite.core.permissions.ManageAnalysisRequests"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
@@ -140,25 +140,25 @@
     for="bika.lims.interfaces.IAnalysisRequest"
     name="base_view"
     class=".analysisrequest.AnalysisRequestView"
-    permission="bika.lims.ManageAnalysisRequests"
+    permission="senaite.core.permissions.ManageAnalysisRequests"
     layer="bhp.lims.interfaces.IBhpLIMS" />
   <browser:page
     for="bika.lims.interfaces.IAnalysisRequest"
     name="analyses"
     class=".analysisrequest.AnalysisRequestAnalysesView"
-    permission="bika.lims.permissions.AddAnalysis"
+    permission="senaite.core.permissions.AddAnalysis"
     layer="bhp.lims.interfaces.IBhpLIMS" />
   <browser:page
     for="bika.lims.interfaces.IAnalysisRequest"
     name="manage_results"
     class=".analysisrequest.AnalysisRequestManageResultsView"
-    permission="bika.lims.EditResults"
+    permission="senaite.core.permissions.EditResults"
     layer="bhp.lims.interfaces.IBhpLIMS" />
   <browser:page
     for="bika.lims.interfaces.IAnalysisRequest"
     name="published_results"
     class=".analysisrequest.AnalysisRequestPublishedResultsView"
-    permission="bika.lims.ManageAnalysisRequests"
+    permission="senaite.core.permissions.ManageAnalysisRequests"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--

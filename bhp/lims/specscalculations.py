@@ -37,7 +37,7 @@ def get_specification_for(spec, default=_marker):
     dob = api.get_field_value(request, "DateOfBirth")
     sampled = request.getDateSampled()
     if not dob or not sampled:
-        logger.error("No DateSampled/ DateOfBirth set. Ignore if 1.3 upgrade")
+        #logger.error("No DateSampled/ DateOfBirth set. Ignore if 1.3 upgrade")
         return {}
 
     specification = request.getSpecification()
