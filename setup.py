@@ -35,7 +35,6 @@ setup(
         "senaite.impress",
         "senaite.jsonapi",
         "senaite.lims>=1.2.2",
-        "senaite.storage",
         "setuptools",
         "PyPDF2",
     ],
