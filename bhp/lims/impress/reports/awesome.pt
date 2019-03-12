@@ -403,7 +403,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tal:analyses tal:repeat="analysis python:view.get_analyses_by(model, poc=poc, category=category, retracted=True)">
+                <tal:analyses tal:repeat="analysis python:view.get_analyses_by(model, poc=poc, category=category, retracted=False)">
                   <tr tal:attributes="class python:analysis.review_state == 'retracted' and 'retracted' or ''">
                     <td class="analysis">
                       <span class="text-success"
