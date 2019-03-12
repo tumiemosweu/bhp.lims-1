@@ -938,6 +938,7 @@ def sanitize_ranges_calculation_from_analyses(portal):
     calc = api.search(query, "bika_setup_catalog")
     if not calc:
         logger.warn("Calculation 'Ranges calculation' not found! [SKIP]")
+        return
     calc = api.get_object(calc[0])
     calc_uid = api.get_uid(calc)
 
