@@ -27,10 +27,16 @@ class BhpSingleReportView(SingleReportView):
         return " ".join(age)
 
     def getDateTested(model):
-        """Returns the result capture date of the analysis from the AR passed in that was last submitted
+        """Returns the result capture date of the analysis from the AR passed
+        in that was last submitted
         """
         return max(map(lambda an: an.getResultCaptureDate(),
                        model.getAnalyses(full_objects=True)))
+
+    def is_floatable(self, result):
+        """Returns whether the result is floatable or not
+        """
+        return api.is_floatable(result)
 
 
 class BhpMultiReportView(MultiReportView):
@@ -49,3 +55,7 @@ class BhpMultiReportView(MultiReportView):
             return None
         return getTransitionDate(obj, transition, return_as_datetime=True)
 
+    def is_floatable(self, result):
+        """Returns whether the result is floatable or not
+        """
+        return api.is_floatable(result)

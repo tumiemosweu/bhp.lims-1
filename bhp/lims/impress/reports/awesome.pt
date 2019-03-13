@@ -437,9 +437,10 @@
                     <td class="text-center align-middle graphrange">
                       <div class="range-chart"
                            style="width:125px;"
-                           tal:condition="python:analysis.review_state != 'retracted'"
+                           tal:define="result python: analysis.getResult();"
+                           tal:condition="python:analysis.review_state != 'retracted' and view.is_floatable(result)"
                            tal:attributes="data-range python: json.dumps(analysis.getResultsRange());
-                                           data-result python: analysis.getResult();"></div>
+                                           data-result python: result;"></div>
                     </td>
                   </tr>
                   <tr tal:condition="analysis/Remarks">
