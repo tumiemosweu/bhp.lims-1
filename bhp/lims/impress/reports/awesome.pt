@@ -440,7 +440,7 @@
                            tal:define="result python: analysis.getResult();"
                            tal:condition="python:analysis.review_state != 'retracted' and view.is_floatable(result)"
                            tal:attributes="data-range python: json.dumps(analysis.getResultsRange());
-                                           data-result python: result;"></div>
+                                           data-result python: view.to_float(result);"></div>
                     </td>
                   </tr>
                   <tr tal:condition="analysis/Remarks">

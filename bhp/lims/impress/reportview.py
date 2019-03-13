@@ -38,6 +38,11 @@ class BhpSingleReportView(SingleReportView):
         """
         return api.is_floatable(result)
 
+    def to_float(self, result):
+        """Returns the floatable result
+        """
+        return api.to_float(result)
+
 
 class BhpMultiReportView(MultiReportView):
     """BHP specific controller view for multi-reports
@@ -59,3 +64,8 @@ class BhpMultiReportView(MultiReportView):
         """Returns whether the result is floatable or not
         """
         return api.is_floatable(result)
+
+    def to_float(self, result):
+        """Returns the floatable result
+        """
+        return api.to_float(result)
