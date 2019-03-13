@@ -28,6 +28,8 @@
       table td.label { white-space: nowrap; }
       .table td, .table th { border-top: none; border-bottom: 1px solid #dee2e6 }
       table tr.retracted td span { color:#999999 }
+      .table tr.noborder td { border-bottom: none; }
+      td.remarks { padding-left:15px; padding-bottom:10px; }
 
 
       .middle-dot-after:after { content: " · "; }
@@ -404,7 +406,10 @@
               </thead>
               <tbody>
                 <tal:analyses tal:repeat="analysis python:view.get_analyses_by(model, poc=poc, category=category, retracted=False)">
-                  <tr tal:attributes="class python:analysis.review_state == 'retracted' and 'retracted' or ''">
+                  <tr tal:define="retracted_css python:analysis.review_state == 'retracted' and 'retracted' or '';
+                                  remarks_css python:analysis.Remarks and 'noborder' or '';
+                                  css python: ' '.join([retracted_css, remarks_css]);"
+                    tal:attributes="class css">
                     <td class="analysis">
                       <span class="text-success"
                             tal:content="accredited_symbol"
@@ -435,6 +440,11 @@
                            tal:condition="python:analysis.review_state != 'retracted'"
                            tal:attributes="data-range python: json.dumps(analysis.getResultsRange());
                                            data-result python: analysis.getResult();"></div>
+                    </td>
+                  </tr>
+                  <tr tal:condition="analysis/Remarks">
+                    <td colspan="5" class="small remarks">
+                      <div tal:replace="structure analysis/Remarks"></div>
                     </td>
                   </tr>
                 </tal:analyses>
