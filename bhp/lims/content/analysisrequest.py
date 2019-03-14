@@ -10,6 +10,7 @@ from Products.CMFCore.permissions import ModifyPortalContent, View
 from archetypes.schemaextender.interfaces import IOrderableSchemaExtender
 from archetypes.schemaextender.interfaces import ISchemaModifier
 from bhp.lims.config import GENDERS
+from bhp.lims.config import CODES
 from bhp.lims.config import PRIORITIES
 from bika.lims import bikaMessageFactory as _
 from bika.lims.browser.widgets import DateTimeWidget
@@ -109,6 +110,40 @@ fields = [
         )
     ),
 
+    ExtStringField(
+        "VisitCode",
+        mode="rw",
+        required=0,
+        read_permission=View,
+        vocabulary=CODES,
+        write_permission=ModifyPortalContent,
+        widget=SelectionWidget(
+            format="select",
+            label=_("Visit Code"),
+            render_own_label=True,
+            visible={
+                'add': 'edit',
+            },
+        )
+    ),
+
+    ExtStringField(
+        "DayWeekNumber",
+        mode="rw",
+        required=0,
+        read_permission=View,
+        write_permission=ModifyPortalContent,
+        widget=StringWidget(
+            label=_("Day/Week Number"),
+            description=_("This field is required if day or week is selected in Visit Code"),
+            maxlength=4,
+            size=4,
+            render_own_label=True,
+            visible={
+                'add': 'edit',
+            },
+        )
+        ),
     ExtBooleanField(
         "Fasting",
         mode="rw",

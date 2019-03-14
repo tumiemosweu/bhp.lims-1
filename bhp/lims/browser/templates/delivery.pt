@@ -195,6 +195,7 @@
           <th>GENDER</th>
           <th>DRAWN DATE</th>
           <th>VISIT</th>
+          <th>CODE</th>
           <th>F</th>
           <th>S</th>
       </tr>
@@ -213,6 +214,10 @@
           <td tal:content="python: view.get(analysisrequest, 'Gender').upper()"></td>
           <td tal:content="python: view.get(analysisrequest, 'DateSampled').strftime('%d/%m/%y')"></td>
           <td tal:content="python: view.get(analysisrequest, 'Visit').upper()"></td>
+          <td >
+              <span tal:content="python: view.get(analysisrequest, 'VisitCode').upper() or ''"></span>
+              <span tal:content="python: view.get(analysisrequest, 'DayWeekNumber') or ''"></span>
+          </td>
           <td><div class="checkbox"></div></td>
           <td><div class="checkbox"></div></td>F
       </tr>

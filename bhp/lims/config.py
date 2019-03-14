@@ -22,3 +22,15 @@ PRIORITIES = DisplayList((
     ('3', 'Routine'),
     ('5', 'STAT'),
 ))
+
+CODES = DisplayList((
+    ('screening','Screening'),
+    ('entry','Entry'),
+    ('infusion','Infusion'),
+    ('pre_infusion','Pre-Infusion'),
+    ('post_infusion','Post-Infusion'),
+    ('day','Day'),
+    ('week','Week'),
+    ('delivery','Delivery')
+
+))

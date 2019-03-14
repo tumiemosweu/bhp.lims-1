@@ -117,6 +117,8 @@ ADD_AR_FIELDS_SORTED = [
     'ParticipantInitials',
     'Gender',
     'Visit',
+    'VisitCode',
+    'DayWeekNumber',
     'DateOfBirth',
     'Fasting',
     'ClientSampleID',
