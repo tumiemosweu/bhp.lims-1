@@ -36,6 +36,17 @@
       .iphen-after:after { content: " - "; }
       .table-sm { padding-top: 0; padding-bottom:0 }
 
+      span.grade_1, span.grade_2, span.grade_3, span.grade_4 {
+        color:#fff;
+        font-weight:bold;
+        padding:2px;
+        border-radius:3px;
+      }
+      span.grade_1 { background-color: #FFAA00; }
+      span.grade_2 { background-color: #FF8000; }
+      span.grade_3 { background-color: #FF4D00; }
+      span.grade_4 { background-color: #FF0000; }
+
 
       @page {
         @bottom-left {
@@ -375,15 +386,17 @@
             <table class="table table-sm table-condensed">
               <colgroup>
                 <!-- Category -->
-                <col style="width: 40%;">
+                <col style="width: 35%;">
                 <!-- Result -->
                 <col style="width: 20%">
                 <!-- Unit -->
-                <col style="width: 15%">
+                <col style="width: 10%">
                 <!-- Range -->
                 <col style="width: 15%">
                 <!-- Flags -->
                 <col style="width: 15%">
+                <!-- Grades -->
+                <col style="width: 5%">
               </colgroup>
               <thead>
                 <tr class="small">
@@ -402,6 +415,7 @@
                   <th class="flags">
                     <span i18n:translate="">Flags</span>
                   </th>
+                  <th class="grades"></th>
                 </tr>
               </thead>
               <tbody>
@@ -442,9 +456,15 @@
                            tal:attributes="data-range python: json.dumps(analysis.getResultsRange());
                                            data-result python: view.to_float(result);"></div>
                     </td>
+                    <td class="text-center align-middle small">
+                      <tal:grade define="grade_html python:view.get_grade_html(analysis)"
+                                 condition="python: grade_html">
+                        <div class="grade" tal:content="structure grade_html"></div>
+                      </tal:grade>
+                    </td>
                   </tr>
                   <tr tal:condition="analysis/Remarks">
-                    <td colspan="5" class="small remarks">
+                    <td colspan="6" class="small remarks">
                       <div tal:replace="structure analysis/Remarks"></div>
                     </td>
                   </tr>

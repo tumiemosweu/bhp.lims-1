@@ -4,6 +4,7 @@
 
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.Registry import registerWidget
+from bhp.lims.config import GRADES_KEYS
 from bhp.lims.browser.analysisspecification import AnalysisSpecificationView
 from bika.lims.browser.widgets.analysisspecificationwidget import \
     AnalysisSpecificationWidget as BaseWidget
@@ -31,14 +32,19 @@ class AnalysisSpecificationWidget(BaseWidget):
 
         for index in range(len(values)):
             item = values[index]
-            min_panic = self._get_spec_value(form, item["uid"], "minpanic")
-            max_panic = self._get_spec_value(form, item["uid"], "maxpanic")
-            s_calc = self._get_spec_value(form, item["uid"], "calculation",
-                                                     check_floatable=False)
-
+            uid = item["uid"]
+            min_panic = self._get_spec_value(form, uid, "minpanic")
+            max_panic = self._get_spec_value(form, uid, "maxpanic")
+            s_calc = self._get_spec_value(form, uid, "calculation",
+                                          check_floatable=False)
             values[index]["minpanic"] = min_panic
             values[index]["maxpanic"] = max_panic
             values[index]["calculation"] = s_calc
+
+            # Grades
+            for grade in GRADES_KEYS:
+                grade_val = self._get_spec_value(form, uid, grade)
+                values[index][grade] = grade_val
 
         return values, outdict
 

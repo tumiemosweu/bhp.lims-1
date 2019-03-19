@@ -29,3 +29,10 @@ def _folder_item_specifications(self, analysis_brain, item):
     if not out_shoulders:
         img = get_image("warning.png", title=_("Result in shoulder range"))
     self._append_html_element(item, "Result", img)
+
+    # Grades
+    grade = api.get_grade_number(analysis_brain)
+    if grade:
+        span = "&nbsp;<span class='small grade_{}'>G{}</span>".format(grade,
+                                                                      grade)
+        self._append_html_element(item, "Result", span)

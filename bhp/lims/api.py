@@ -2,8 +2,10 @@
 #
 # Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
+import sys
 from Products.ATContentTypes.utils import DT2dt
 from bhp.lims import logger
+from bhp.lims.config import GRADES_KEYS
 from bika.lims.api import *
 from bika.lims.utils import render_html_attributes
 from dateutil.relativedelta import relativedelta
@@ -95,9 +97,47 @@ def to_age(age):
 
 
 def is_in_panic(brain_or_object):
-    """Returns true if the result for the analysis passed in is equal or below
-    the min panic or equal or above max panic
+    """Returns true if the result for the analysis passed in is within any of
+    the intervals defined for the minimum grade level the panic alert is
+    configured for.
     """
+    grade_cutoff = 3
+    grade = get_grade_number(brain_or_object)
+    if grade >= grade_cutoff:
+        return True
+    return False
+
+
+def get_grades_numbers():
+    """Returns a list with the available grade numbers/indexes
+    """
+    grades = list()
+    for grade in GRADES_KEYS:
+        grade_idx = int(grade.split("_")[0].replace("G", ""))
+        grades.append(grade_idx)
+    return list(set(grades))
+
+
+def get_grade_number(brain_or_object):
+    """Return the result grade the result of the analysis falls in. If the
+    result does not fail within any grade range, returns None
+    """
+    for grade in get_grades_numbers():
+        if is_in_grade_range(brain_or_object, grade):
+            return grade
+    return None
+
+
+def is_in_grade_range(brain_or_object, grade, level=None):
+    """Returns whether the result is within the specified grade index and level
+    """
+    if not level:
+        if is_in_grade_range(brain_or_object, grade, level="low"):
+            return True
+        if is_in_grade_range(brain_or_object, grade, level="high"):
+            return True
+        return False
+
     result = safe_getattr(brain_or_object, "getResult", None)
     if not is_floatable(result):
         return False
@@ -106,18 +146,24 @@ def is_in_panic(brain_or_object):
     if not result_range:
         return False
 
-    # Out of range. Check if minpanic or maxpanic are set
+    grade_min_key = "G{}_{}_min".format(grade, level)
+    grade_min = result_range.get(grade_min_key, "")
+    if not is_floatable(grade_min):
+        if min(get_grades_numbers()) != grade:
+            return False
+        grade_min = -sys.maxint - 1
+
+    grade_low_max_key = "G{}_{}_max".format(grade, level)
+    grade_max = result_range.get(grade_low_max_key, "")
+    if not is_floatable(grade_max):
+        if max(get_grades_numbers()) != grade:
+            return False
+        grade_max = sys.maxint
+
     result = to_float(result)
-    panic_min = result_range.get('minpanic', "")
-    panic_max = result_range.get('maxpanic', "")
-    panic_min = is_floatable(panic_min) and panic_min or None
-    panic_max = is_floatable(panic_max) and panic_max or None
-
-    if panic_min is not None and result <= panic_min:
+    if result >= to_float(grade_min) and result <= to_float(grade_max):
         return True
 
-    if panic_max is not None and result >= panic_max:
-        return True
     return False
 
 

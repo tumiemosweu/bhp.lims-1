@@ -6,6 +6,7 @@ import collections
 
 from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
+from bhp.lims.config import GRADES_KEYS
 from bika.lims.browser.widgets.analysisspecificationwidget import \
     AnalysisSpecificationView as BaseView
 
@@ -23,6 +24,13 @@ class AnalysisSpecificationView(BaseView):
         max_panic = {"title": _("Max panic"), "sortable": False}
         self.add_column('maxpanic', max_panic, after='warn_max')
 
+        # Add Grade ranges fields
+        for grade in GRADES_KEYS:
+            grade_label = grade.replace("_", " ")
+            grade_item = {"title": _(grade_label), "sortable": False}
+            self.add_column(grade, grade_item, before="hidemax")
+
+        # Add spec calculation column
         calculation = {"title": _("Specification Calculation"),
                        "sortable": False, "type": "choices"}
         self.add_column("calculation", calculation, after='hidemax')
@@ -49,8 +57,13 @@ class AnalysisSpecificationView(BaseView):
             nitem["minpanic"] = specsresults.get("minpanic", "")
             nitem["maxpanic"] = specsresults.get("maxpanic", "")
             nitem["calculation"] = specsresults.get("calculation", "")
+            for grade in GRADES_KEYS:
+                nitem[grade] = specsresults.get(grade, "")
+
         nitem["choices"]["calculation"] = self.get_calculations_choices()
         nitem["allow_edit"].extend(["minpanic", "maxpanic", "calculation"])
+        nitem["allow_edit"].extend(list(GRADES_KEYS))
+
         return nitem
 
     def add_column(self, keyword, column, before=None, after=None):

@@ -43,6 +43,15 @@ class BhpSingleReportView(SingleReportView):
         """
         return api.to_float(result)
 
+    def get_grade_html(self, analysis):
+        """Returns an html representation (span) of the grade range the result
+        of the analysis falls in, if any. Otherwise, returns None
+        """
+        grade_idx = api.get_grade_number(analysis)
+        if not grade_idx:
+            return None
+        return "<span class='grade_{}'>G{}</span>".format(grade_idx, grade_idx)
+
 
 class BhpMultiReportView(MultiReportView):
     """BHP specific controller view for multi-reports
@@ -69,3 +78,12 @@ class BhpMultiReportView(MultiReportView):
         """Returns the floatable result
         """
         return api.to_float(result)
+
+    def get_grade_html(self, analysis):
+        """Returns an html representation (span) of the grade range the result
+        of the analysis falls in, if any. Otherwise, returns None
+        """
+        grade_idx = api.get_grade_number(analysis)
+        if not grade_idx:
+            return None
+        return "<span class='grade_{}'>G{}</span>".format(grade_idx, grade_idx)

@@ -11,6 +11,7 @@ from Products.DCWorkflow.Guard import Guard
 from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
+from bhp.lims.config import GRADES_KEYS
 from bhp.lims.specscalculations import get_xls_specifications
 from bika.lims.browser.analysisrequest.add2 import AR_CONFIGURATION_STORAGE
 from bika.lims.catalog.analysis_catalog import CATALOG_ANALYSIS_LISTING
@@ -847,6 +848,8 @@ def import_specifications_for_sample_type(portal, sample_type):
             'rangecomments': '',
             'calculation': api.get_uid(calc),
         }
+        grades_dict = {grade: "" for grade in GRADES_KEYS}
+        specs_dict.update(grades_dict)
         ranges = api.get_field_value(aspec, 'ResultsRange', [{}])
         ranges = filter(lambda val: val.get('keyword') != keyword, ranges)
         ranges.append(specs_dict)
@@ -892,6 +895,8 @@ def apply_specifications_to_all_sampletypes(portal):
                 'rangecomments': '',
                 'calculation': calc_uid,
             }
+            grades_dict = {grade: "" for grade in GRADES_KEYS}
+            specs_dict.update(grades_dict)
             ranges = api.get_field_value(senaite_spec, 'ResultsRange', [{}])
             ranges = filter(lambda val: val.get('keyword') != keyword, ranges)
             ranges.append(specs_dict)

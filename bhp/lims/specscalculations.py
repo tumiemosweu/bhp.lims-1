@@ -4,11 +4,12 @@
 
 import os
 
+from time import time
 from bhp.lims import api
-from bhp.lims import logger
 from bhp.lims.config import GENDERS
 from bika.lims.interfaces.analysis import IRequestAnalysis
 from openpyxl.reader.excel import load_workbook
+from plone.memoize import ram
 
 _marker = object()
 raw_specifcations = []
@@ -96,8 +97,11 @@ def get_analysisspec(analysis_keyword, gender, years, months, days):
     return {}
 
 
+@ram.cache(lambda *args: time() // (60 * 60 * 2))
 def get_xls_specifications():
-    """Returns the specifications from the xlsx file"""
+    """Returns the specifications from the xlsx file
+    Very expensive operation, will not be called more than once every 2 hours
+    """
     worksheet_name = "Analysis Specifications"
     curr_dirname = os.path.dirname(os.path.abspath(__file__))
     filename = "{}/resources/results_ranges.xlsx".format(curr_dirname)

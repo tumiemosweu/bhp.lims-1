@@ -32,5 +32,23 @@ CODES = DisplayList((
     ('day','Day'),
     ('week','Week'),
     ('delivery','Delivery')
-
 ))
+
+GRADES_KEYS = (
+    "G1_low_min",
+    "G1_low_max",
+    "G1_high_min",
+    "G1_high_max",
+    "G2_low_min",
+    "G2_low_max",
+    "G2_high_min",
+    "G2_high_max",
+    "G3_low_min",
+    "G3_low_max",
+    "G3_high_min",
+    "G3_high_max",
+    "G4_low_min",
+    "G4_low_max",
+    "G4_high_min",
+    "G4_high_max",
+)
