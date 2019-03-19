@@ -1261,6 +1261,9 @@ def sync_partitions(portal):
         primary = api.get_field_value(request, "PrimaryAnalysisRequest", None)
         if primary:
             request.setParentAnalysisRequest(primary)
+            # We reset the value to None because in 1.3, PrimaryAnalysisRequest
+            # is used for secondary Samples, not for Partitions!
+            request.setPrimaryAnalysisRequest(None)
             request.reindexObject()
     commit_transaction(portal)
     logger.info("Syncing partitions [DONE]")
