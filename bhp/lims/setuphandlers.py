@@ -107,6 +107,7 @@ ADD_AR_FIELDS_TO_HIDE = [
     "InternalUse",
     "Container",
     "Preservation",
+    "PrimaryAnalysisRequest",
 ]
 
 ADD_AR_FIELDS_SORTED = [
