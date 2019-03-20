@@ -2,7 +2,7 @@
 
 ## 190320 (19-03-20)
 
-- `bhp.lims` [@e65413f](https://github.com/bhp-lims/bhp.lims/tree/e65413f0b2601d8b606a434070d8ca57cd54c969)
+- `bhp.lims` [@68cca07](https://github.com/bhp-lims/bhp.lims/tree/68cca076fbe999f2c6465e4c6a43790d0c5593e3)
 - `senaite.api` [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
 - `senaite.core` [@d34ace1](https://github.com/senaite/senaite.core/tree/d34ace15baa63252da530a5ed256bcaead8eb4c8)
 - `senaite.core.listing` [@e32a7f6](https://github.com/senaite/senaite.core.listing/tree/e32a7f60e605604f3408bd5cdc7b35cde696648f)
