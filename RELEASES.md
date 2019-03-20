@@ -62,7 +62,7 @@ Estimated time for update/deployment completion: 2.5h - 3h
 - `senaite.core`: [(v1.2.9.1 - v1.3.0) Diff 1.2.9 - 1c1ab4b](https://github.com/senaite/senaite.core/compare/1.2.9...d34ace1)
 
 *SC: changes in `senaite.core` add-on*
-*For the full list of changes from v1.2.9.1 to v.1.3 check [senaite.core's changelog](https://github.com/senaite/senaite.core/blob/master/CHANGES.rst#changelog)
+*For the full list of changes from v1.2.9.1 to v.1.3 check [senaite.core's changelog](https://github.com/senaite/senaite.core/blob/master/CHANGES.rst#changelog)*
 
 
 ## 190314 (19-03-14)
