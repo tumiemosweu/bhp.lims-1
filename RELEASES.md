@@ -4,7 +4,7 @@
 
 - `bhp.lims` [@68cca07](https://github.com/bhp-lims/bhp.lims/tree/68cca076fbe999f2c6465e4c6a43790d0c5593e3)
 - `senaite.api` [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
-- `senaite.core` [@d34ace1](https://github.com/senaite/senaite.core/tree/d34ace15baa63252da530a5ed256bcaead8eb4c8)
+- `senaite.core` (v1.3.0) [@d34ace1](https://github.com/senaite/senaite.core/tree/d34ace15baa63252da530a5ed256bcaead8eb4c8)
 - `senaite.core.listing` [@e32a7f6](https://github.com/senaite/senaite.core.listing/tree/e32a7f60e605604f3408bd5cdc7b35cde696648f)
 - `senaite.core.supermodel`[@e8fdad1](https://github.com/senaite/senaite.core.supermodel/tree/e8fdad119025c9be2299a76e51946a7007f92177)
 - `senaite.impress`[@bcd1409](https://github.com/senaite/senaite.impress/tree/bcd14095901c5118a7133480ea5b7914c43873df)
@@ -71,7 +71,7 @@ Estimated time for update/deployment completion: 2.5h - 3h
 
 - `bhp.lims` [@e65413f](https://github.com/bhp-lims/bhp.lims/tree/e65413f0b2601d8b606a434070d8ca57cd54c969)
 - `senaite.api` [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
-- `senaite.core` [@1c1ab4b](https://github.com/senaite/senaite.core/tree/1c1ab4b0d2c8c09f89384c8e412e406fba698ac0)
+- `senaite.core` (v1.3.0) [@1c1ab4b](https://github.com/senaite/senaite.core/tree/1c1ab4b0d2c8c09f89384c8e412e406fba698ac0)
 - `senaite.core.listing` [@e1783c1](https://github.com/senaite/senaite.core.listing/tree/e1783c1dbce23efe4ce26a99e9ffbff372c6aaf0)
 - `senaite.core.supermodel`[@e8fdad1](https://github.com/senaite/senaite.core.supermodel/tree/e8fdad119025c9be2299a76e51946a7007f92177)
 - `senaite.impress`[@bcd1409](https://github.com/senaite/senaite.impress/tree/bcd14095901c5118a7133480ea5b7914c43873df)
@@ -114,3 +114,14 @@ Estimated time for update/deployment completion: 2.5h - 3h
 ### Relevant changes in other add-ons
 
 - `senaite.core`: [Diff 1.2.9 - 1c1ab4b](https://github.com/senaite/senaite.core/compare/1.2.9...1c1ab4b#diff-db23dcd814354c954091a9b90dbfd92a)
+
+
+## 190130 (19-01-30)
+
+- `bhp.lims` [@068fa16](https://github.com/bhp-lims/bhp.lims/tree/068fa1677de3d4da89a4595cf93f69db53d13c83)
+- `senaite.api` [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
+- `senaite.core` (v1.2.9.2) [@e460cf6](https://github.com/senaite/senaite.core/tree/e460cf662d7a64c37d086e9cc03a0abe8905143e)
+- `senaite.core.supermodel`(v1.1.0) [@bbcffac](https://github.com/senaite/senaite.core.supermodel/tree/bbcffac883526daf79c8ffb8d4299116094f4e14)
+- `senaite.impress` (v1.1.0) [@f070925](https://github.com/senaite/senaite.impress/tree/f0709257b6536074b8cfe05212a47565c46fb8c2)
+- `senaite.jsonapi` [@871959f](https://github.com/senaite/senaite.jsonapi/tree/871959f4b1c9edbb477e9456325527ca78e13ec6)
+- `senaite.lims` [@3137ae4](https://github.com/senaite/senaite.lims/tree/3137ae4b4940c50a72b30291ad45dc85b3c179ee)
