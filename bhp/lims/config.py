@@ -24,6 +24,7 @@ PRIORITIES = DisplayList((
 ))
 
 CODES = DisplayList((
+    ('',''),
     ('screening','Screening'),
     ('entry','Entry'),
     ('infusion','Infusion'),
@@ -31,6 +32,7 @@ CODES = DisplayList((
     ('post_infusion','Post-Infusion'),
     ('day','Day'),
     ('week','Week'),
+    ('month','Month'),
     ('delivery','Delivery')
 ))
 
