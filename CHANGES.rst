@@ -4,6 +4,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #223 Add "Client Sample ID" in requisition form
 - #189 Add "Date Sample Received at Lab" in delivery checklist
 - #187 Add Participant ID column in Analysis Requests listing
 - #186 Add Assay Date field (editable) in Analysis Request and report
