@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="bhp.lims">
+  <head>
+    <title></title>
+  </head>
+  <body>
+
+    <metal:view_macro define-macro="view" tal:replace="accessor">
+    </metal:view_macro>
+
+    <metal:define define-macro="edit">
+      <metal:use use-macro="field_macro | context/widgets/field/macros/edit">
+        <metal:fill metal:fill-slot="widget_body"
+                      tal:define="raw_value python:field.getAccessor(here)();
+                                  units python:field.Vocabulary(context);
+                                  unit python:widget.get_unit(units, raw_value) or '';
+                                  volume python:unit and widget.get_volume(raw_value) or raw_value;">
+          <input type="text"
+                 tal:attributes="name string:${fieldName}_volume;
+                                 id string:${fieldName}_volume;
+                                 value volume;
+                                 size widget/size;
+                                 maxsize widget/maxlength|nothing;
+                                 placeholder widget/placeholder|nothing;">
+          <select tal:attributes="name string:${fieldName}_unit;
+                                  id string:${fieldName}_unit;">
+            <tal:units repeat="item units">
+              <option tal:define="text python:units.getValue(item)"
+                      tal:content="text"
+                      tal:attributes="value item;
+                                      selected python: unit in [item, text];">
+              </option>
+            </tal:units>
+          </select>
+          <input type="hidden"
+                 tal:attributes="name fieldName;
+                                 value raw_value">
+        </metal:fill>
+      </metal:use>
+    </metal:define>
+
+    <div metal:define-macro="search">
+      <div metal:use-macro="context/widgets/string/macros/edit">
+      </div>
+    </div>
+  </body>
+</html>

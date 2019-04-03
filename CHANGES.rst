@@ -4,6 +4,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #167 Allow dropdown menu for volume units when creating an analysis request
 - #223 Add "Client Sample ID" in requisition form
 - #189 Add "Date Sample Received at Lab" in delivery checklist
 - #187 Add Participant ID column in Analysis Requests listing

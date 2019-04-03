@@ -77,7 +77,7 @@ def to_age_str(years=0, months=0, days=0):
 
 
 def to_age(age):
-    """Returns  a tuple with the year, month and days for a given age in passed
+    """Returns a tuple with the year, month and days for a given age in passed
     in as string format
     """
     def get_age_value(age_str, age_key):
@@ -94,6 +94,40 @@ def to_age(age):
     months = get_age_value(age, 'm')
     days = get_age_value(age, 'd')
     return (years, months, days)
+
+
+def get_unit(volume_unit, default=""):
+    """Returns the unit string from the value passed in, if any
+    """
+    if not volume_unit:
+        return default
+    unit = volume_unit.replace(get_leading_number(volume_unit), "").strip()
+    return unit or default
+
+
+def get_volume(volume_unit, default=0):
+    """Returns the volume (decimal) from the value passed in
+    """
+    number = get_leading_number(volume_unit)
+    if not number:
+        return default
+    return to_float(number)
+
+
+def get_leading_number(value):
+    if not value:
+        return ""
+
+    val_str = ""
+    for val in list(value.strip()):
+        tmp_val = "{}{}".format(val_str, val)
+        if not is_floatable(tmp_val):
+            if val_str:
+                break
+            if val not in [".", "-"]:
+                break
+        val_str = tmp_val
+    return val_str.strip()
 
 
 def is_in_panic(brain_or_object):

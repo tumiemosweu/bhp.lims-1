@@ -5,13 +5,14 @@
 from Products.Archetypes.Widget import BooleanWidget
 from Products.Archetypes.public import StringWidget
 from Products.Archetypes.public import TextAreaWidget
-from Products.Archetypes.references import HoldingReference
 from Products.CMFCore.permissions import ModifyPortalContent, View
 from archetypes.schemaextender.interfaces import IOrderableSchemaExtender
 from archetypes.schemaextender.interfaces import ISchemaModifier
-from bhp.lims.config import GENDERS
+from bhp.lims.browser.widgets.volumeunitwidget import VolumeUnitWidget
 from bhp.lims.config import CODES
+from bhp.lims.config import GENDERS, VOLUME_UNITS
 from bhp.lims.config import PRIORITIES
+from bhp.lims.fields import VolumeUnitField
 from bika.lims import bikaMessageFactory as _
 from bika.lims.browser.widgets import DateTimeWidget
 from bika.lims.browser.widgets import SelectionWidget
@@ -178,13 +179,14 @@ fields = [
         ),
     ),
 
-    ExtStringField(
+    VolumeUnitField(
         "Volume",
         mode="rw",
         required=1,
         read_permission=View,
         write_permission=ModifyPortalContent,
-        widget=StringWidget(
+        vocabulary=VOLUME_UNITS,
+        widget=VolumeUnitWidget(
             label=_("Estimated Sample Volume"),
             maxlength=8,
             size=8,

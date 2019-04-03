@@ -65,4 +65,12 @@
     replacement=".content.analysisrequest.has_analyses_in_panic"
   />
 
+  <!-- Analysis Request's Add get_records -->
+  <monkey:patch
+    description=""
+    class="bika.lims.browser.analysisrequest.add2.ajaxAnalysisRequestAddView"
+    original="get_records"
+    replacement=".browser.analysisrequest.add2.get_records"
+  />
+
 </configure>

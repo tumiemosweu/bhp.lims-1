@@ -23,6 +23,13 @@ PRIORITIES = DisplayList((
     ('5', 'STAT'),
 ))
 
+VOLUME_UNITS = DisplayList((
+    ("uL", "uL"),
+    ("mL", "mL"),
+    ("L", "L"),
+    ("", "Other")
+))
+
 CODES = DisplayList((
     ('',''),
     ('screening','Screening'),
