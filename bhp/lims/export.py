@@ -8,6 +8,7 @@ from StringIO import StringIO
 from bhp.lims import logger
 from bhp.lims import api
 from DateTime import DateTime
+from bika.lims.interfaces import IClient
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 from plone.memoize.ram import cache
@@ -58,17 +59,49 @@ def to_wf_state(obj, key, value):
     return REVIEW_STATE_MAP.get(value, value)
 
 
-ROWS = [
+SAMPLES_ROWS = [
     # TITLE, ATTRIBUTE, CONVERTER FUNCTION
-    (u"Request-ID", "getId", to_string),
+    (u"Sample-ID", "getId", to_string),
     (u"Client-ID", "Client.ClientID", to_string),
     (u"Client Name", "getClientTitle", to_string),
     (u"Contact", "getContactFullName", to_string),
+    (u"Participant-ID", "ParticipantID", to_string),
+    (u"Gender", "Gender", to_string),
+    (u"Visit", "Visit", to_string),
+    (u"VisitCode", "VisitCode", to_string),
+    (u"DayWeekNumber", "DayWeekNumber", to_string),
+    (u"DateOfBirth", "DateOfBirth", to_date),
+    (u"Volume", "Volume", to_string),
+    (u"Sample Type", "getSampleTypeTitle", to_string),
+    (u"Sample Condition", "SampleCondition.title", to_string),
+    (u"Sample Template", "TemplateTitle", to_string),
+    (u"Client Reference", "ClientReference", to_string),
+    (u"Sample Point", "getSamplePointTitle", to_string),
+    (u"Date Sampled", "getDateSampled", to_long_date),
+    (u"Date Received", "getDateReceived", to_long_date),
+    (u"Date Assay", "AssayDate", to_long_date),
+    (u"Date Published", "getDatePublished", to_long_date),
+    (u"Price", "getSubtotalTotalPrice", to_string),
+]
+
+ANALYSES_ROWS = [
+    # TITLE, ATTRIBUTE, CONVERTER FUNCTION
+    (u"Sample-ID", "getId", to_string),
+    (u"Client-ID", "Client.ClientID", to_string),
+    (u"Client Name", "getClientTitle", to_string),
+    (u"Contact", "getContactFullName", to_string),
+    (u"Participant-ID", "ParticipantID", to_string),
+    (u"Gender", "Gender", to_string),
+    (u"Visit", "Visit", to_string),
+    (u"VisitCode", "VisitCode", to_string),
+    (u"DayWeekNumber", "DayWeekNumber", to_string),
+    (u"DateOfBirth", "DateOfBirth", to_date),
+    (u"Volume", "Volume", to_string),
     (u"Sample Type", "getSampleTypeTitle", to_string),
     (u"Sample Condition", "SampleCondition.title", to_string),
     (u"Client Reference", "ClientReference", to_string),
     (u"Sample Point", "getSamplePointTitle", to_string),
-    (u"Analyse", "Analysis.Title", to_string),
+    (u"Analysis", "Analysis.Title", to_string),
     (u"Unit", "Analysis.Unit", to_string),
     # (u"Sort Key", "Analysis.SortKey", to_string),
     (u"Analyst", "Analysis.getAnalystName", to_string),
@@ -76,6 +109,7 @@ ROWS = [
     (u"Date Sampled", "getDateSampled", to_long_date),
     (u"Date Received", "getDateReceived", to_long_date),
     (u"Date Captured", "Analysis.getResultCaptureDate", to_long_date),
+    (u"Date Assay", "AssayDate", to_long_date),
     (u"Date Verified", "Analysis.getDateVerified", to_long_date),
     (u"Date Published", "getDatePublished", to_long_date),
     (u"Status", "Analysis.review_state", to_wf_state),
@@ -105,7 +139,12 @@ class ExportView(BrowserView):
 
     @property
     def header(self):
-        return map(lambda item: item[0], ROWS)
+        data_type = self.request.get("type", "sample")
+        if data_type == "analysis":
+            return map(lambda item: item[0], ANALYSES_ROWS)
+        elif data_type == "sample":
+            return map(lambda item: item[0], SAMPLES_ROWS)
+        return []
 
     def get_csv(self):
         output = StringIO()
@@ -153,6 +192,17 @@ class ExportView(BrowserView):
         sorted_analyses = sorted(analyses, key=self.get_sortable_title)
         return sorted_analyses
 
+    def get_current_client(self):
+        """Returns the current client
+        """
+        client = api.get_current_client()
+        if client:
+            return client
+
+        if IClient.providedBy(self.context):
+            return self.context
+        return None
+
     def search(self):
         """Search all ARs of the system
         """
@@ -162,8 +212,12 @@ class ExportView(BrowserView):
             "portal_type": "AnalysisRequest",
             "sort_on": "created",
             "sort_order": "descending",
-            "inactive_state": "active",
         }
+
+        # Client?
+        client = self.get_current_client()
+        if client:
+            query["getClientUID"] = api.get_uid(client)
 
         # review_state
         review_state = self.request.get("review_state")
@@ -180,6 +234,39 @@ class ExportView(BrowserView):
         return catalog(query)
 
     def get_data(self):
+        data_type = self.request.get("type", "sample")
+        if data_type == "analysis":
+            return self.get_analyses_data()
+        elif data_type == "sample":
+            return self.get_samples_data()
+        return []
+
+    def get_samples_data(self):
+        rows = []
+
+        ars = self.search()
+        total = len(ars)
+        logger.info("Exporting data of {} ARs".format(total))
+
+        for num, ar in enumerate(ars):
+            data = []
+            ar = SuperModel(api.get_uid(ar))
+            model = ar
+            for row in SAMPLES_ROWS:
+                title, key, converter = row
+                if key.startswith("Analysis"):
+                    continue
+                value = self.get(model, key)
+                data.append(converter(ar, key, value))
+            rows.append(data)
+
+            if num % 100 == 0:
+                logger.info("Exported {}/{}".format(num, total))
+
+        return rows
+
+
+    def get_analyses_data(self):
         rows = []
 
         ars = self.search()
@@ -192,7 +279,7 @@ class ExportView(BrowserView):
             for an in self.get_analyses(ar):
                 data = []
                 an = SuperModel(api.get_uid(an))
-                for row in ROWS:
+                for row in ANALYSES_ROWS:
                     model = ar
                     title, key, converter = row
                     if key.startswith("Analysis"):
