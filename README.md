@@ -10,6 +10,7 @@ Botswana Harvard Partnership AIDS Institute (BHP) at Botswana.
 - [Setup the BHP LIMS Virtual machine from scratch](ansible/README.md)
 - [How to create a Sample with JSON API](docs/SampleCreation.md)
 - [Troubleshooting](docs/Troubleshooting.rst)
+- [Releases](Releases.md)
 
 ## Useful Links
 
