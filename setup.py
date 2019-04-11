@@ -29,14 +29,9 @@ setup(
     install_requires=[
         "archetypes.schemaextender",
         "pyBarcode",
-        "senaite.core.listing",
-        "senaite.core.supermodel>=1.0.0",
-        "senaite.core>=1.3",
-        "senaite.impress",
-        "senaite.jsonapi",
-        "senaite.lims>=1.2.2",
-        "setuptools",
         "PyPDF2",
+        "senaite.lims>=1.3.0",
+        "senaite.storage",
     ],
     extras_require={
         "test": [

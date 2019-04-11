@@ -2,6 +2,7 @@
 <metadata>
     <version>1.0.0</version>
     <dependencies>
-      <dependency>profile-bika.lims:default</dependency>
+      <dependency>profile-senaite.lims:default</dependency>
+      <dependency>profile-senaite.storage:default</dependency>
   </dependencies>
 </metadata>
