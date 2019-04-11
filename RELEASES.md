@@ -1,5 +1,59 @@
 # Releases
 
+## 190411 (19-04-11)
+
+- `bhp.lims` [@cdf206d](https://github.com/bhp-lims/bhp.lims/tree/cdf206d4b26c1cf199f6d5bff9700116b8626083)
+- `senaite.api` v1.2.3-r2 [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
+- `senaite.core` v1.3.1 [@77177d3](https://github.com/senaite/senaite.core/tree/77177d3c4e9c3ba7e1fa1b8869a24a5b427dcd92)
+- `senaite.core.listing` v1.2.0 [@1a32bff](https://github.com/senaite/senaite.core.listing/tree/1a32bff1c8189b482cce9913df5348c7b242754b)
+- `senaite.core.supermodel` v1.3.0 [@318921c](https://github.com/senaite/senaite.core.supermodel/tree/318921cba001994c9cafa6d2231623fb2b871627)
+- `senaite.impress` v1.2.0 [@c958dbd](https://github.com/senaite/senaite.impress/tree/c958dbd194018cd063d02998b43b57fbf610b2aa)
+- `senaite.jsonapi` v1.2.1 [@871959f](https://github.com/senaite/senaite.jsonapi/tree/871959f4b1c9edbb477e9456325527ca78e13ec6)
+- `senaite.lims` v1.3.0 [@94f2a4a](https://github.com/senaite/senaite.lims/tree/94f2a4ae01c4fbce6182dc3ea281b128c908dccd)
+- `senaite.storage` v1.0.0 [@3f5454f](https://github.com/senaite/senaite.storage/tree/3f5454f28ac2917d0c504492130f2a03c1fd256e)
+
+### Deployment notes
+
+Estimated time for update/deployment completion: 2h
+
+- Upgrade `senaite.core` version 1.3.0
+- Reinstall (QuickInstaller) `senaite.lims`
+- Reinstall (QuickInstaller) `senaite.impress`
+- Reinstall (QuickInstaller) `senaite.storage`
+- Reinstall (QuickInstaller) `bhp.lims`
+
+### Differences with production
+
+- #227 Export filtered by client
+- #167 Allow dropdown menu for volume units when creating an Analysis Request
+- #223 Add client sample id in requisition form
+- #215 Adding other choices visit code field
+- #106 When adding new Analysis Request from clinic then upload an attachment ...
+- #221 After creating more than one ar, not all analysis request's appear in next page ...
+- #74 Value for Gender cannot be copied across columns in Analysis Request Add form
+- [SC#1319](https://github.com/senaite/senaite.core/pull/1319) Fix AttributeError: state_variable
+- [SC#1320](https://github.com/senaite/senaite.core/pull/1320) Make api.get_review_history to always return a list
+- [SC#1318](https://github.com/senaite/senaite.core/pull/1318) Add function addAttachment in Sample to preserve previous attachments
+- [SC#1317](https://github.com/senaite/senaite.core/pull/1317) Fix Analysis Service URL in Info Popup
+- [SC#1312](https://github.com/senaite/senaite.core/pull/1312) Reject adapter does not consider analyses have reject action too
+- [SC#1296](https://github.com/senaite/senaite.core/pull/1296) Setting the Price via "Manage Analyses" does not work and breaks the invoice calculation
+- [SC#1303](https://github.com/senaite/senaite.core/pull/1303) Preserve review history in 1.3 upgrade
+- [SC#1270](https://github.com/senaite/senaite.core/pull/1270) Log Tab of Client Sample Points rises Traceback
+- [SC#1305](https://github.com/senaite/senaite.core/pull/1305) Ensure analyses from primary are removed after being added to partitions
+- [SC#1304](https://github.com/senaite/senaite.core/pull/1304) Some Items show the Display/State/Add menu
+- [SC#1307](https://github.com/senaite/senaite.core/pull/1307) Traceback when using «Submit» of the global WF menu
+- [SC#1309](https://github.com/senaite/senaite.core/pull/1309) Added Samples rejection view
+- [SC#1310](https://github.com/senaite/senaite.core/pull/1310) Support for radio copy in Sample Add view
+- [SL#100](https://github.com/senaite/senaite.lims/pull/100) Improve Styling of Navigation Portlet
+- [SI#67](https://github.com/senaite/senaite.impress/pull/67) Fix PublicationPreference Traceback in Default template
+
+*SC: changes in `senaite.core` add-on*
+
+*SL: changes in `senaite.lims` add-on*
+
+*SI: changes in `senaite.impress` add-on*
+
+
 ## 190401 (19-04-01)
 
 - `bhp.lims` [@3010260](https://github.com/bhp-lims/bhp.lims/tree/30102609d5c0a5bbd1c751846d5d77b919d56ab7)
