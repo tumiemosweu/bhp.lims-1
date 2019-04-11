@@ -13,16 +13,9 @@ plone_timezone: "Africa/Gaborone"
 plone_always_run_buildout: yes
 plone_additional_eggs:
   - bhp.lims
-  - senaite.api
-  - senaite.core
-  - senaite.core.listing
-  - senaite.core.supermodel
-  - senaite.impress
-  - senaite.jsonapi
-  - senaite.lims
 
 plone_sources:
-  - "bhp.lims = git git@github.com:bhp-lims/bhp.lims.git"
+  - "bhp.lims = git github-bhp-lims:bhp-lims/bhp.lims.git"
   - "senaite.api = git https://github.com/senaite/senaite.api.git"
   - "senaite.core = git https://github.com/senaite/senaite.core.git"
   - "senaite.core.listing = git https://github.com/senaite/senaite.core.listing.git"
@@ -30,6 +23,8 @@ plone_sources:
   - "senaite.impress = git https://github.com/senaite/senaite.impress.git"
   - "senaite.jsonapi = git https://github.com/senaite/senaite.jsonapi.git"
   - "senaite.lims = git https://github.com/senaite/senaite.lims.git"
+  - "senaite.storage = git https://github.com/senaite/senaite.storage.git"
+
 
 # SECURITY
 firewall_open_tcp_ports: [25, 80, 443]
