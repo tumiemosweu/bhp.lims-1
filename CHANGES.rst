@@ -3,7 +3,7 @@ Changelog
 
 1.0.0 (unreleased)
 ------------------
-
+- #222 Delivery checklist should have a container type
 - #167 Allow dropdown menu for volume units when creating an analysis request
 - #223 Add "Client Sample ID" in requisition form
 - #189 Add "Date Sample Received at Lab" in delivery checklist

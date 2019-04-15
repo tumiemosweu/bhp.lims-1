@@ -4,10 +4,15 @@
       i18n:domain="bhp">
 <head>
     <style>
+        @page {
+                size: landscape;
+        }
+
         body {
             font-family: Arial, Verdana, serif;
             font-size:9pt;
-            width:210mm;
+            width:310mm;
+            writing-mode: tb-rl;
         }
         .comments{
             color:black;
@@ -19,7 +24,7 @@
             border-radius: 10px;
             margin-top:10px;
             margin-left: -30px;
-            width:700px;
+            width:900px;
 
         }
         table th {
@@ -36,7 +41,7 @@
             border: 1px solid black ;
             border-radius: 10px;
             padding:10px;
-            width: 680px;
+            width: 880px;
         }
         .lab-title {
           font-weight:bold;
@@ -108,7 +113,7 @@
 
         }
         .line_intials_personnel_delivering {
-            width: 36%;
+            width: 26%;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
@@ -120,15 +125,18 @@
             margin-top: 50px;
         }
         .line_depart_time {
-            width: 47%;
+            width: 27%;
             padding: 1px;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
             margin-top: -30px;
         }
-        .line_time_specimen_received {
-            width: 39%;
+        .departure{
+        margin-left:300px;
+        }
+        .line_received_time {
+            width: 19%;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
@@ -182,42 +190,61 @@
         </div>
         <div class="header-part site-info">
             <h5><span>BHP</span><span tal:content="python:client.getTaxNumber()"></span></h5>
+            <span tal:content="python:client.getClientID()"></span>
         </div>
         <div class="clearfix"></div>
       </div>
 
-    <table cellspacing="0" cellpadding="0" width="100%">
+    <table cellspacing="0" cellpadding="0" width="110px">
       <tr>
           <th>Specimen</th>
           <th>PRIORITY</th>
           <th>PANEL</th>
           <th>PID</th>
           <th>GENDER</th>
-          <th>DRAWN DATE</th>
+          <th>DRAWN DATE TIME</th>
           <th>VISIT</th>
           <th>CODE</th>
-          <th>F</th>
-          <th>S</th>
+          <th>Study ID</th>
+          <th>Sample ID</th>
+          <th>Container Type/ Volume</th>
+          <th>C</th>
+          <th>L</th>
       </tr>
       <tal:ar repeat="analysisrequest view/analysis_requests">
-      <tr tal:define="client python:analysisrequest.aq_parent"><td>
+      <tr tal:define="client python:analysisrequest.aq_parent">
+          <td>
             <div>
                 <span tal:content="python: analysisrequest.id"></span>
             </div>
           </td>
-          <td tal:content="python: analysisrequest.getPriority()"></td>
+          <td>
+            <span tal:content="python: view.get(analysisrequest, 'Priority')"></span>
+          </td>
           <td tal:define="template python: view.get(analysisrequest,'Template')"
               tal:content="python: template and template.Title() or ''"></td>
           <td>
               <span tal:content="python: view.get(analysisrequest, 'ParticipantID')"></span>
           </td>
           <td tal:content="python: view.get(analysisrequest, 'Gender').upper()"></td>
-          <td tal:content="python: view.get(analysisrequest, 'DateSampled').strftime('%d/%m/%y')"></td>
+          <td tal:content="python: view.get(analysisrequest, 'DateSampled').strftime('%d/%m/%y %H:%M')"></td>
           <td tal:content="python: view.get(analysisrequest, 'Visit').upper()"></td>
           <td >
               <span tal:content="python: view.get(analysisrequest, 'VisitCode').upper() or ''"></span>
               <span tal:content="python: view.get(analysisrequest, 'DayWeekNumber') or ''"></span>
           </td>
+          <td>
+              <span tal:content="python: view.get(analysisrequest, 'OtherParticipantReference') or ''"></span>
+          </td>
+          <td>
+              <span tal:content="python: view.get(analysisrequest, 'ClientSampleID') or ''"></span>
+          </td>
+           <td
+           tal:define="container python: view.get(analysisrequest, 'DefaultContainerType');
+                           container python: container or view.get(analysisrequest, 'Container')">
+                <span tal:content="python: container and container.Title() or ''"></span>&nbsp;/&nbsp;
+                <span tal:content="python: view.get(analysisrequest, 'Volume')"></span>
+           </td>
           <td><div class="checkbox"></div></td>
           <td><div class="checkbox"></div></td>F
       </tr>
@@ -226,17 +253,18 @@
     <div class="other_details">
         <h3>Comments <span class="line_comments"></span></h3>
         <h3 class="line_comments_continuation"></h3>
-        <h3 class="initials">Initials of the site personnel completing this form
+        <h3 class="initials">Clinic Staff Initials
             <span class="line_initials_site_personnel"></span>
+            <span class="departure">Departure Date:<span class="line_depart_time"></span></span>
         </h3>
         <h3>Courier Name:
             <span class="line_intials_personnel_delivering"></span>
             <span tal:content="python: view.get(analysisrequest[0],'Courier').Title()"></span>
         </h3>
-        <h3>Departure Time:<span class="line_depart_time"></span></h3>
-        <h3>Date Specimen Received at Lab:<span class="line_time_specimen_received"></span></h3>
-        <h3>Time Specimen Received at Lab:<span class="line_time_specimen_received"></span></h3>
-        <h3>initials of lab personnel receiving the samples:<span class="line_personnel_receiving"></span></h3>
+        <h3>Lab Staff Initials:
+            <span class="line_initials_site_personnel"></span>
+            <span class="departure">Date & Time Specimen Received at Lab:<span class="line_received_time"></span></span>
+        </h3>
     </div>
   </div>
 </body>
