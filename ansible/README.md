@@ -32,10 +32,10 @@ Add the following configuration (it may differ depending on your interface id):
 # The hostonly network interface
 auto enp0s8
 iface enp0s8 inet static
-address 192.168.33.10
-netmask 255.255.255.0
-network 192.168.33.0
-broadcast 192.168.33.255
+    address 192.168.33.10
+    netmask 255.255.255.0
+    network 192.168.33.0
+    broadcast 192.168.33.255
 ```
 
 Reboot for the changes to take effect:

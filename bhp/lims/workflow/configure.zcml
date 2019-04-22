@@ -14,4 +14,10 @@
          Products.DCWorkflow.interfaces.IAfterTransitionEvent"
     handler=".analysis.AfterTransitionEventHandler" />
 
+  <!-- Before event handler for routine analyses transitions -->
+  <subscriber
+    for="bika.lims.interfaces.IRoutineAnalysis
+         Products.DCWorkflow.interfaces.IBeforeTransitionEvent"
+    handler=".analysis.BeforeTransitionEventHandler" />
+
 </configure>

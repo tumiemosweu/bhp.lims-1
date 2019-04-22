@@ -88,9 +88,6 @@ IDS_TO_FLUSH = (
     # List of IDFormatting prefixes used for IDs storage by NumberGenerator.
     # The upgrade step will flush all IDs starting with this prefix
     # Look at http://localhost:8080/senaite/ng
-    # TODO Remove after 1.3 working in production
-    "sample-",
-    "analysisrequest-",
 )
 
 NEW_ATTACHMENT_TYPES = [
@@ -257,9 +254,6 @@ ROLE_MAPPINGS = [
 
 OBJECTS_TO_REINDEX = [
     # List of tuples (catalog_name, query)
-    # Reindex all analyses
-    # TODO Remove after 1.3 working in production
-    (CATALOG_ANALYSIS_LISTING, {})
 ]
 
 # BHP-specific
@@ -280,22 +274,6 @@ PRINTERS = {
 ^XZ"""
     },
 }
-
-# TODO Remove after 1.3 working in production
-PROXY_FIELDS_TO_PURGE = [
-    "ParticipantID",
-    "OtherParticipantReference",
-    "ParticipantInitials",
-    "Gender",
-    "Visit",
-    "Fasting",
-    "DateOfBirth",
-    "Volume",
-    "OtherInformation",
-    "Courier",
-    "InternalUse",
-    "PrimarySample",
-]
 
 
 def setup_handler(context):
@@ -371,9 +349,6 @@ def setup_handler(context):
 
     # Disable auto-partitioning
     disable_autopartitioning(portal)
-
-    # Compatibility with 1.3
-    migrate_to_v13(portal)
 
     # Reindex objects
     reindex_objects(portal)
@@ -1171,103 +1146,6 @@ def commit_transaction(portal):
     end = time.time()
     logger.info("Commit transaction ... Took {:.2f}s [DONE]"
                 .format(end - start))
-
-
-# TODO Remove after 1.3 working in production
-def migrate_to_v13(portal):
-    """Required steps to migrate from version 1.2.9.1 to v1.3
-    """
-    # Port Analysis Request Proxy Fields
-    port_analysis_request_proxy_fields(portal)
-
-    # ParentAnalysisRequest' is the field for partition-parent relationship
-    sync_partitions(portal)
-
-
-# TODO Remove after 1.3 working in production
-def port_analysis_request_proxy_fields(portal):
-    logger.info("Purging Analysis Request Proxy Fields ...")
-
-    def set_value(analysis_request, field_name, field_value):
-        ar_field = analysis_request.Schema()[field_name]
-        if ar_field.type == 'uidreference':
-            if api.is_object(field_value):
-                field_value = api.get_uid(field_value)
-            elif not api.is_uid(field_value):
-                return
-        ar_field.set(analysis_request, field_value)
-
-    def unlink_proxy_fields(sample_brain, analysis_request=None):
-        processed_fields = []
-        sample_obj = api.get_object(sample_brain)
-        if not analysis_request:
-            for ar in sample_obj.getAnalysisRequests():
-                processed_fields.extend(unlink_proxy_fields(sample_brain, ar))
-                ar.reindexObject()
-            return list(set(processed_fields))
-
-        for field_id in PROXY_FIELDS_TO_PURGE:
-            field_value = None
-            try:
-                field = sample_obj.Schema().getField(field_id)
-                field_value = field.get(sample_obj)
-            except AttributeError:
-                logger.warn("Field {} not found for {}"
-                            .format(field_id, sample_obj.getId()))
-            if not field_value:
-                continue
-            set_value(analysis_request, field_id, field_value)
-            processed_fields.append(field_id)
-        return processed_fields
-
-    start = time.time()
-
-    query = dict(portal_type="Sample")
-    brains = api.search(query, "bika_catalog")
-    total = len(brains)
-    need_commit = False
-    for num, brain in enumerate(brains):
-        if num % 10 == 0:
-            logger.info("Purging Analysis Requests' ProxyField: {}/{}"
-                        .format(num, total))
-        if num % TRANSACTION_THERESHOLD == 0:
-            commit_transaction(portal)
-        unlink_proxy_fields(brain)
-
-    commit_transaction(portal)
-    end = time.time()
-    logger.info("Purging Analysis Request Proxy Fields took {:.2f}s"
-                .format(end - start))
-
-
-# TODO Remove after 1.3 working in production
-def sync_partitions(portal):
-    """In previous versions, PrimaryAnalysisRequest was used as the Reference
-    Field to set the relationship between partitions and primary ARs. In 1.3,
-    this functionality is already provided by core, but through field
-    ParentAnalysisRequest.
-    """
-    logger.info("Syncing partitions ...")
-    query = dict(portal_type="AnalysisRequest")
-    brains = api.search(query, CATALOG_ANALYSIS_REQUEST_LISTING)
-    total = len(brains)
-    for num, brain in enumerate(brains):
-        if num % 100 == 0:
-            logger.info("Syncing partitions from old Analysis Requests: {}/{}"
-                        .format(num, total))
-        if num % TRANSACTION_THERESHOLD == 0:
-            commit_transaction(portal)
-
-        request = api.get_object(brain)
-        primary = api.get_field_value(request, "PrimaryAnalysisRequest", None)
-        if primary:
-            request.setParentAnalysisRequest(primary)
-            # We reset the value to None because in 1.3, PrimaryAnalysisRequest
-            # is used for secondary Samples, not for Partitions!
-            request.setPrimaryAnalysisRequest(None)
-            request.reindexObject()
-    commit_transaction(portal)
-    logger.info("Syncing partitions [DONE]")
 
 
 def reindex_objects(portal):
