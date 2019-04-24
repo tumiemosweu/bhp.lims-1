@@ -21,6 +21,7 @@ from bika.lims.catalog.catalog_utilities import addZCTextIndex
 from bika.lims.idserver import renameAfterCreation
 from bika.lims.interfaces import INumberGenerator
 from bika.lims.utils import tmpID
+from bika.lims.workflow import getTransitionDate
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
 
@@ -352,6 +353,10 @@ def setup_handler(context):
 
     # Reindex objects
     reindex_objects(portal)
+
+    # Set the date the Sample was received at the lab, not at point of testing
+    # https://github.com/bhp-lims/bhp.lims/issues/233
+    fix_i233(portal)
 
     logger.info("BHP setup handler [DONE]")
 
@@ -1182,3 +1187,25 @@ def disable_autopartitioning(portal):
         template.setAutoPartition(False)
         template.reindexObject()
     logger.info("Disabling auto-partitioning for Templates [DONE]")
+
+
+def fix_i233(portal):
+    """Set the date the Sample was received at the lab, not at point of testing
+    https://github.com/bhp-lims/bhp.lims/issues/233
+    """
+    logger.info("Reseting Date Received (#233) ...")
+    brains = api.search({},CATALOG_ANALYSIS_REQUEST_LISTING)
+    total = len(brains)
+    for num, brain in enumerate(brains):
+        if num % 100 == 0:
+            logger.info("Reseting Date Received: {}/{}".format(num, total))
+        if num % TRANSACTION_THERESHOLD == 0:
+            commit_transaction(portal)
+
+        sample = api.get_object(brain)
+        date_received = getTransitionDate(sample, "deliver", True)
+        if date_received:
+            sample.setDateReceived(date_received)
+            sample.reindexObject(idxs=["getDateReceived", "is_received"])
+
+    logger.info("Reseting Date Received (#233) [DONE]")

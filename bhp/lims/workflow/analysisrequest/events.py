@@ -55,5 +55,12 @@ def after_receive(analysis_request):
     passed in is performed
     """
     events.after_receive(analysis_request)
+
+    # Set the date the Sample was received at the lab, not at point of testing
+    # https://github.com/bhp-lims/bhp.lims/issues/233
+    date_received = wf.getTransitionDate(analysis_request, "deliver", True)
+    if date_received:
+        analysis_request.setDateReceived(date_received)
+
     events.do_action_to_ancestors(analysis_request, "receive")
     events.do_action_to_descendants(analysis_request, "receive")
