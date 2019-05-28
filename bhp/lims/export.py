@@ -62,6 +62,7 @@ def to_wf_state(obj, key, value):
 SAMPLES_ROWS = [
     # TITLE, ATTRIBUTE, CONVERTER FUNCTION
     (u"Sample-ID", "getId", to_string),
+    (u"Client-Sample-ID", "getClientSampleID", to_string),
     (u"Client-ID", "Client.ClientID", to_string),
     (u"Client Name", "getClientTitle", to_string),
     (u"Contact", "getContactFullName", to_string),
@@ -87,6 +88,7 @@ SAMPLES_ROWS = [
 ANALYSES_ROWS = [
     # TITLE, ATTRIBUTE, CONVERTER FUNCTION
     (u"Sample-ID", "getId", to_string),
+    (u"Client-Sample-ID", "getClientSampleID", to_string),
     (u"Client-ID", "Client.ClientID", to_string),
     (u"Client Name", "getClientTitle", to_string),
     (u"Contact", "getContactFullName", to_string),
