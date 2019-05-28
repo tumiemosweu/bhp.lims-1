@@ -139,6 +139,41 @@ def is_in_panic(brain_or_object):
     grade = get_grade_number(brain_or_object)
     if grade >= grade_cutoff:
         return True
+
+    if not grade:
+        # No grading defined for this analysis, check the panic level range
+        return is_in_panic_range(brain_or_object)
+
+    return False
+
+
+def is_in_panic_range(brain_or_object):
+    """Returns whether the analysis passed in is equal or below the min panic
+    or equal or above max panic
+    """
+    result = safe_getattr(brain_or_object, "getResult", None)
+    if not is_floatable(result):
+        return False
+
+    result_range = safe_getattr(brain_or_object, "getResultsRange", None)
+    if not result_range:
+        return False
+
+    result = to_float(result)
+
+    # Below the min panic?
+    panic_min = result_range.get('minpanic', "")
+    panic_min = is_floatable(panic_min) and to_float(panic_min) or None
+    if panic_min is not None and result <= panic_min:
+        return True
+
+    # Above the max panic
+    panic_max = result_range.get('maxpanic', "")
+    panic_max = is_floatable(panic_max) and to_float(panic_max) or None
+    if panic_max is not None and result >= panic_max:
+        return True
+
+    # Not in panic
     return False
 
 

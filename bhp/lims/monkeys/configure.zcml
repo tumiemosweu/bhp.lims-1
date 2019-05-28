@@ -32,13 +32,6 @@
     original="get_variables"
     replacement=".idserver.get_variables"
   />
-  <!-- Inject "studyId" param in number generator view (ng) -->
-  <monkey:patch
-    description=""
-    class="bika.lims.browser.idserver.view.IDServerView"
-    original="get_next_id_for"
-    replacement=".browser.idserver.get_next_id_for"
-  />
 
   <monkey:patch
     description=""
