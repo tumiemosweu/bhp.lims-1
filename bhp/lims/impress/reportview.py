@@ -26,13 +26,6 @@ class BhpSingleReportView(SingleReportView):
         age = filter(lambda val: val != None, [years, months, days])
         return " ".join(age)
 
-    def getDateTested(model):
-        """Returns the result capture date of the analysis from the AR passed
-        in that was last submitted
-        """
-        return max(map(lambda an: an.getResultCaptureDate(),
-                       model.getAnalyses(full_objects=True)))
-
     def is_floatable(self, result):
         """Returns whether the result is floatable or not
         """
@@ -51,6 +44,20 @@ class BhpSingleReportView(SingleReportView):
         if not grade_idx:
             return None
         return "<span class='grade_{}'>G{}</span>".format(grade_idx, grade_idx)
+
+    def get_referral_labs_data(self, sample):
+        """Returns a dictionary with the data to be displayed if one or more
+        analyses were tested by a referral lab
+        """
+        data = {}
+        for analysis in sample.getAnalyses(full_objects=True):
+            ref_lab = api.get_field_value(analysis, "ReferralLab", None)
+            if ref_lab:
+                title = api.get_title(ref_lab)
+                stored = data.get(title, [])
+                stored.append(api.get_title(analysis))
+                data.update({title: stored})
+        return data
 
 
 class BhpMultiReportView(MultiReportView):

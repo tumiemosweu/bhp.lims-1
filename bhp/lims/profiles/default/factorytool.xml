@@ -4,5 +4,7 @@
   <type portal_type="Courier"/>
   <type portal_type="BarcodePrinters"/>
   <type portal_type="BarcodePrinter"/>
+  <type portal_type="ReferralLabs"/>
+  <type portal_type="ReferralLab"/>
  </factorytypes>
 </object>

@@ -6,4 +6,8 @@
  <!-- Barcode Printer -->
  <object name="BarcodePrinters" meta_type="Factory-based Type Information with dynamic views"/>
  <object name="BarcodePrinter" meta_type="Factory-based Type Information with dynamic views"/>
+
+ <!-- Referral Laboratories -->
+ <object name="ReferralLabs" meta_type="Factory-based Type Information with dynamic views"/>
+ <object name="ReferralLab" meta_type="Factory-based Type Information with dynamic views"/>
 </object>

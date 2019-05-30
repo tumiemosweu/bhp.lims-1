@@ -47,6 +47,10 @@
       span.grade_3 { background-color: #FF4D00; }
       span.grade_4 { background-color: #FF0000; }
 
+      .section-referral-labs { color: #555555; }
+      .section-referral-labs div.col-sm-12 { padding-top:20px; font-size:0.9em; }
+      .section-referral-labs ul { margin:0; padding: 0 0 0 15px; }
+
 
       @page {
         @bottom-left {
@@ -502,30 +506,22 @@
     </div>
   </tal:render>
 
-  <!--  FOOTER -->
-  <tal:render condition="python:False">
-    <div class="row footer">
+  <!--  REFERRAL LABS INFO -->
+  <tal:render define="ref_labs_data python:view.get_referral_labs_data(model)"
+              condition="python:ref_labs_data">
+    <div class="row section-referral-labs">
       <div class="col-sm-12">
-        <table>
-            <tr>
-                <td class="small" style="width:50%">
-                    <div>
-                        * test accredited<br/>
-                        ** test not accredited<br/>
-                        *** test sub-contracted to an accredited laboratory<br/>
-                        **** test sub-contracted to a non accredited laboratory
-                    </div>
-                </td>
-                <td class="green small" style="width:50%">
-                    This report refers only to the samples tested.<br/>
-                    The sample collection is the customer's responsability.<br/>
-                    When applicable, this version completely replaces the previous version.<br/>
-                    Prohibited the partial reproduction of this document.<br/>
-                    The opinions and interpretation are outside of the accreditation scope.
-                </td>
-            </tr>
-        </table>
-    </div>
+        <div tal:repeat="ref_lab_title python:ref_labs_data.keys()">
+          <span i18n:translate="">The following analytes</span>
+          <ul>
+            <li tal:repeat="analyte python:ref_labs_data[ref_lab_title]"
+                tal:content="analyte">
+            </li>
+          </ul>
+          <span i18n:translate="">were tested by</span>&nbsp;
+          <span tal:content="ref_lab_title"></span>
+        </div>
+      </div>
     </div>
   </tal:render>
 

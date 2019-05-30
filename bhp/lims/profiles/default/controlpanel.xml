@@ -9,7 +9,7 @@
     icon_expr="string:++resource++bhp.images/courier.png"
     url_expr="string:$portal_url/bika_setup/couriers"
     visible="True">
-  <permission>BIKA: Manage Bika</permission>
+  <permission>senaite.core: Manage Bika</permission>
  </configlet>
 
  <configlet title="Barcode Printers" action_id="barcodeprinters"
@@ -18,7 +18,17 @@
             url_expr="string:$portal_url/bika_setup/barcodeprinters"
             visible="True"
             i18n:attributes="title">
-   <permission>BIKA: Manage Bika</permission>
+   <permission>senaite.core: Manage Bika</permission>
+ </configlet>
+
+ <!-- Referral Laboratories -->
+ <configlet title="Referral Laboratories" action_id="referrallabs"
+            appId="bhp.lims" category="bika" condition_expr=""
+            icon_expr="string:++resource++bhp.lims.static/images/referrallabs.png"
+            url_expr="string:$portal_url/bika_setup/referrallabs"
+            visible="True"
+            i18n:attributes="title">
+   <permission>senaite.core: Manage Bika</permission>
  </configlet>
 
 </object>

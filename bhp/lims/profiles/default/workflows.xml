@@ -8,17 +8,27 @@
     <bindings>
 
         <!-- Courier -->
+        <type type_id="Couriers">
+          <bound-workflow workflow_id="senaite_one_state_workflow"/>
+        </type>
         <type type_id="Courier">
             <bound-workflow workflow_id="courier_workflow"/>
         </type>
-        <type type_id="Couriers"/>
 
         <!-- Barcodes -->
-        <type type_id="BarcodePrinters"/>
+        <type type_id="BarcodePrinters">
+          <bound-workflow workflow_id="senaite_one_state_workflow"/>
+        </type>
         <type type_id="BarcodePrinter">
-          <bound-workflow workflow_id="bika_one_state_workflow"/>
-          <bound-workflow workflow_id="bika_inactive_workflow"/>
+          <bound-workflow workflow_id="senaite_deactivable_type_workflow"/>
         </type>
 
+        <!-- Referral Laboratories -->
+        <type type_id="ReferralLabs">
+          <bound-workflow workflow_id="senaite_one_state_workflow"/>
+        </type>
+        <type type_id="ReferralLab">
+          <bound-workflow workflow_id="senaite_deactivable_type_workflow"/>
+        </type>
     </bindings>
 </object>

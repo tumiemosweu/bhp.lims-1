@@ -14,4 +14,12 @@
       permission="senaite.core.permissions.ManageBika"
       layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!-- Referral laboratories -->
+  <browser:page
+      for="bhp.lims.interfaces.IReferralLabs"
+      name="folder_view"
+      class=".referrallabs.ReferralLabsListing"
+      permission="senaite.core.permissions.ManageBika"
+      layer="bhp.lims.interfaces.IBhpLIMS" />
+
 </configure>

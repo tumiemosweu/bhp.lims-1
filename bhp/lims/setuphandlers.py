@@ -41,6 +41,13 @@ CONTROL_PANELS = [
         "title": "Barcode Printers",
         "description": "",
         "insert-after": "*"
+    },
+    {
+        "id": "referrallabs",
+        "type": "ReferralLabs",
+        "title": "Referral Laboratories",
+        "description": "",
+        "insert-after": "*"
     }
 ]
 
@@ -54,6 +61,7 @@ CATALOGS_BY_TYPE = [
     # Tuples of (type, [catalog])
     ("BarcodePrinter", ["bika_setup_catalog"]),
     ("Courier", ["bika_setup_catalog"]),
+    ("ReferralLab", ["bika_setup_catalog"]),
 ]
 
 INDEXES = [
@@ -1204,7 +1212,7 @@ def fix_i233(portal):
 
         sample = api.get_object(brain)
         date_received = getTransitionDate(sample, "deliver", True)
-        if date_received:
+        if date_received and date_received != sample.getDateReceived():
             sample.setDateReceived(date_received)
             sample.reindexObject(idxs=["getDateReceived", "is_received"])
 

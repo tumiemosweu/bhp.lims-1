@@ -35,3 +35,13 @@ class IBarcodePrinters(Interface):
 class IBarcodePrinter(Interface):
     """Marker interface for a Barcode Printer
     """
+
+
+class IReferralLabs(Interface):
+    """Folder containing all Referral Laboratories
+    """
+
+
+class IReferralLab(Interface):
+    """Marker interface for a ReferralLab
+    """

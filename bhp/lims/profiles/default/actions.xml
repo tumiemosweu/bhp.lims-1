@@ -12,7 +12,7 @@
       <property name="icon_expr"/>
       <property name="available_expr"/>
       <property name="permissions">
-        <element value="BIKA: Manage Bika"/>
+        <element value="senaite.core: Manage Bika"/>
       </property>
       <property name="visible">True</property>
     </object>

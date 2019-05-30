@@ -21,4 +21,10 @@
     <!-- Analysis Specifications -->
     <adapter factory=".analysisspec.AnalysisSpecSchemaModifier" />
 
+    <!-- Analysis: ReferralLab -->
+    <adapter
+      factory=".analysis.AnalysisSchemaExtender"
+      name="bhp-analysis-extender"
+      provides="archetypes.schemaextender.interfaces.ISchemaExtender" />
+
 </configure>
