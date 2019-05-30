@@ -72,7 +72,7 @@
   <!-- HEADER -->
   <tal:render condition="python:True"
               define="laboratory view/laboratory;
-                      sample model/Sample">
+                      sample model">
     <div class="row section-header">
       <div class="col-sm-12">
         <table class="table table-sm table-condensed noborder nopadding">
