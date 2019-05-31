@@ -8,6 +8,7 @@ from archetypes.schemaextender.interfaces import ISchemaExtender
 from bhp.lims.content import ExtUIDReferenceField
 from bhp.lims.interfaces import IBhpLIMS
 from bika.lims.interfaces import IAnalysis
+from bika.lims.permissions import FieldEditAnalysisResult
 from zope.component import adapts
 from zope.interface import implements
 
@@ -33,7 +34,7 @@ class AnalysisSchemaExtender(object):
             required=0,
             multiValued=0,
             read_permission=View,
-            write_permission="Field: Edit Result",
+            write_permission=FieldEditAnalysisResult,
             allowed_types=('ReferralLab',),
         ),
     ]
