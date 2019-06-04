@@ -149,7 +149,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_ordered": {
                 "title": "Ordered",
                 "description": "Sample ordered",
-                "transitions": ("send_to_lab",),
+                "transitions": ("send_to_lab", "cancel"),
                 "permissions_copy_from": "sample_due",
             },
 
