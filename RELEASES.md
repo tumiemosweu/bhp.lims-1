@@ -1,5 +1,63 @@
 # Releases
 
+## 190604 (19-06-04)
+
+- `bhp.lims` [@46ee912](https://github.com/bhp-lims/bhp.lims/tree/46ee912c95b5bf395035c1873d2604a9a47540e8)
+- `senaite.api` v1.2.3-r2 [@c79c53a](https://github.com/senaite/senaite.api/tree/c79c53abcbe6e3a5ab3ced86d2f455275efa20cf)
+- `senaite.core` v1.3.1 [@24d54e8](https://github.com/senaite/senaite.core/tree/24d54e8eaa25eac8b06ff9668b243994ed67dcf1)
+- `senaite.core.listing` v1.2.0 [@6433586](https://github.com/senaite/senaite.core.listing/tree/64335869ef11c7a9929272b9e8ca320bc27729af)
+- `senaite.core.supermodel` v1.3.0 [@93ad3de](https://github.com/senaite/senaite.core.supermodel/tree/93ad3def00285b98412001168164527b42401f68)
+- `senaite.impress` v1.2.0 [@64f7c78](https://github.com/senaite/senaite.impress/tree/64f7c788ad4753a7262928aa04d5cef9c4683c41)
+- `senaite.jsonapi` v1.2.1 [@871959f](https://github.com/senaite/senaite.jsonapi/tree/871959f4b1c9edbb477e9456325527ca78e13ec6)
+- `senaite.lims` v1.3.0 [@3c7fc7b](https://github.com/senaite/senaite.lims/tree/3c7fc7b462321fb354c478c19b5c20f3014fa398)
+- `senaite.storage` v1.0.0 [@3f5454f](https://github.com/senaite/senaite.storage/tree/3f5454f28ac2917d0c504492130f2a03c1fd256e)
+
+### Deployment notes
+
+Estimated time for update/deployment completion: 2h
+
+- Upgrade `senaite.core` version 1.3.1
+- Reinstall (QuickInstaller) `senaite.core.listing`
+- Reinstall (QuickInstaller) `senaite.lims`
+- Reinstall (QuickInstaller) `senaite.impress`
+- Reinstall (QuickInstaller) `bhp.lims`
+
+### Differences with production
+
+- #244 Allow cancel transition for ordered Samples
+- #243 Label the analyses processed by other labs in results report
+- #242 Added Client Sample ID in the exporter output
+- #241 Enable critical result alert for RNA PCR result >39 copies per ml
+- #234 Date/Time for receiving at point of testing as Sample Received Date in results report
+- [SC#1386](https://github.com/senaite/senaite.core/pull/1386) No auto-rejection of Sample when rejection reasons are set in Add form
+- [SC#1385](https://github.com/senaite/senaite.core/pull/1385) Make Formula a required field on Calculation
+- [SC#1382](https://github.com/senaite/senaite.core/pull/1382) Fix double publication of the sample when using multi-reports
+- [SC#1371](https://github.com/senaite/senaite.core/pull/1371) Allow sample publication without sending Email
+- [SC#1368](https://github.com/senaite/senaite.core/pull/1368) Fix workflow state propagation on partition verification
+- [SC#1373](https://github.com/senaite/senaite.core/pull/1373) Reduce the noise in the diff for object paths (audit log)
+- [SC#1367](https://github.com/senaite/senaite.core/pull/1367) Clients can see interim values of analyses not yet verified
+- [SC#1363](https://github.com/senaite/senaite.core/pull/1363) Slightly better performance when retrieving analysis dependencies
+- [SC#1364](https://github.com/senaite/senaite.core/pull/1364) Fixed id seeding view
+- [SC#1361](https://github.com/senaite/senaite.core/pull/1361) Fix leap sample ID sequence after secondary sample
+- [SC#1358](https://github.com/senaite/senaite.core/pull/1358) Fixed icon name for lab contacts
+- [SC#1357](https://github.com/senaite/senaite.core/pull/1357) Fixed Cannot select Analysis Specification on Sample
+- [SC#1343](https://github.com/senaite/senaite.core/pull/1343) Fix Auditlog for removed objects
+- [SC#1344](https://github.com/senaite/senaite.core/pull/1344) Handle inline images in Results Interpretation
+- [SC#1347](https://github.com/senaite/senaite.core/pull/1347) Consider laboratory workdays only for the late analyses calculation
+- [SC#1337](https://github.com/senaite/senaite.core/pull/1337) Refactor Reference Widget search
+- [SC#1338](https://github.com/senaite/senaite.core/pull/1338) Obtain the real IP from the request for the Audit Log
+- [SCL#17](https://github.com/senaite/senaite.core.listing/pull/13) Fix Partitions are not displayed when "Published" filter is used
+- [SI#75](https://github.com/senaite/senaite.impress/pull/75) Conflict safe concurrent report creation
+- [SI#72](https://github.com/senaite/senaite.impress/pull/72) Always set publication date to view timestamp
+- [SI#69](https://github.com/senaite/senaite.impress/pull/69) Fixed empty Date Published on Default report
+
+*SC: changes in `senaite.core` add-on*
+
+*SCL: changes in `senaite.core.listing` add-on*
+
+*SI: changes in `senaite.impress` add-on*
+
+
 ## 190411 (19-04-11)
 
 - `bhp.lims` [@cdf206d](https://github.com/bhp-lims/bhp.lims/tree/cdf206d4b26c1cf199f6d5bff9700116b8626083)

@@ -3,6 +3,12 @@ Changelog
 
 1.0.0 (unreleased)
 ------------------
+
+- #244 Allow cancel transition for ordered Samples
+- #243 Label the analyses processed by other labs in results report
+- #242 Added Client Sample ID in the exporter output
+- #241 Enable critical result alert for RNA PCR result >39 copies per ml
+- #234 Date/Time for receiving at point of testing as Sample Received Date in results report
 - #222 Delivery checklist should have a container type
 - #167 Allow dropdown menu for volume units when creating an analysis request
 - #223 Add "Client Sample ID" in requisition form
