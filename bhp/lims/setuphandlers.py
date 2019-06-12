@@ -157,7 +157,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_shipped": {
                 "title": "Shipped",
                 "description": "Sample shipped",
-                "transitions": ("deliver", ),
+                "transitions": ("deliver", "cancel"),
                 "permissions_copy_from": "sample_due",
             },
 
