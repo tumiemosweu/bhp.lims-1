@@ -253,29 +253,6 @@ fields = [
             showOn=True,
         ),
     ),
-
-    # This Analysis Request is only for internal use?
-    # This field is useful when we create Partitions (AR-like), so we don't
-    # want the client to see Analysis Requests / Samples that are meant to
-    # be used in the lab.
-    ExtBooleanField(
-        "InternalUse",
-        mode="rw",
-        required=0,
-        default=False,
-        read_permission=View,
-        write_permission=ModifyPortalContent,
-        widget=BooleanWidget(
-            format="radio",
-            label=_("Internal use"),
-            render_own_label=True,
-            visible={
-                'add': 'invisible',
-                'edit': 'invisible',
-                'secondary': 'invisible',
-            },
-        ),
-    ),
     ExtReferenceField(
         "PrimarySample",
         required=0,

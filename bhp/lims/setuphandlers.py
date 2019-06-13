@@ -409,6 +409,11 @@ def setup_laboratory(portal):
 
     # Set autoprinting of stickers on register
     portal.bika_setup.setAutoPrintStickers('register')
+
+    # Unselect ShowPartitions from setup to hide partitions to Clients
+    # https://github.com/senaite/senaite.core/pull/1392
+    portal.bika_setup.setShowPartitions(False)
+
     logger.info("Setting up Laboratory [DONE]")
 
 
