@@ -86,11 +86,12 @@ ID_FORMATTING = [
      "split_length": 2,
     },
     {"portal_type": "AnalysisRequestPartition",
-     "form": "{parent_ar_id}{seq:02d}",
-     "sequence_type": "counter",
-     "context": "parent_analysisrequest",
-     "counter_type": "backreference",
-     "counter_reference": "AnalysisRequestParentAnalysisRequest",}
+     "form": "{studyId}{sampleType}{parent_alpha}{partition_count}",
+     "prefix": "analysisrequest_partition",
+     "sequence_type": "generated",
+     "counter_type": "",
+     "split_length": 3,
+     },
 ]
 
 IDS_TO_FLUSH = (
@@ -295,7 +296,7 @@ def setup_handler(context):
     logger.info("BHP setup handler [BEGIN]")
 
     portal = context.getSite()
-
+    """
     # Setup Catalogs
     setup_catalogs(portal)
 
@@ -304,13 +305,13 @@ def setup_handler(context):
 
     # Add new content types
     reindex_new_content_types(portal)
-
+    """
     # Apply ID format to content types
     setup_id_formatting(portal)
 
     # Flush IDs from NumberGenerator
     flush_ids(portal)
-
+    """
     # Setup custom workflow(s)
     setup_workflows(portal)
 
@@ -365,7 +366,7 @@ def setup_handler(context):
     # Set the date the Sample was received at the lab, not at point of testing
     # https://github.com/bhp-lims/bhp.lims/issues/233
     fix_i233(portal)
-
+    """
     logger.info("BHP setup handler [DONE]")
 
 

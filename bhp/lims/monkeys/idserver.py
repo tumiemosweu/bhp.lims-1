@@ -46,8 +46,9 @@ def get_variables(context, **kw):
             "dateSampled": date_sampled,
             "samplingDate": sampling_date,
             "sampleType": context.getSampleType().getPrefix(),
-            'studyId': context.aq_parent.getTaxNumber(),
-            "test_count": test_count
+            "test_count": test_count,
+            # BHP-specific
+            "studyId": context.aq_parent.getTaxNumber(),
         })
 
         # Partition
@@ -60,7 +61,9 @@ def get_variables(context, **kw):
                 "parent_analysisrequest": parent_ar,
                 "parent_ar_id": parent_ar_id,
                 "parent_base_id": parent_base_id,
-                "partition_count": partition_count,
+                # BHP-specific
+                "partition_count": "{:02d}".format(partition_count+1),
+                "parent_alpha": get_sample_alpha(parent_ar),
             })
 
         # Retest
@@ -101,3 +104,15 @@ def get_variables(context, **kw):
         })
 
     return variables
+
+
+def get_sample_alpha(sample):
+    """Returns the alpha part of a sample id when the format id for the
+    given sample matches with '{studyId}{sampleType}{alpha:3a2d}{test_count}'
+    """
+    sample_id = api.get_id(sample)
+    study_id = sample.aq_parent.getTaxNumber()
+    sample_type = sample.getSampleType().getPrefix()
+    prefix = "{}{}".format(study_id, sample_type)
+    len_prefix = len(prefix)
+    return sample_id[len_prefix:len_prefix+5]
