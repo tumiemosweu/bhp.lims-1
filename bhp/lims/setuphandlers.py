@@ -86,11 +86,12 @@ ID_FORMATTING = [
      "split_length": 2,
     },
     {"portal_type": "AnalysisRequestPartition",
-     "form": "{parent_ar_id}{seq:02d}",
-     "sequence_type": "counter",
-     "context": "parent_analysisrequest",
-     "counter_type": "backreference",
-     "counter_reference": "AnalysisRequestParentAnalysisRequest",}
+     "form": "{studyId}{sampleType}{parent_alpha}{partition_count}",
+     "prefix": "analysisrequest_partition",
+     "sequence_type": "generated",
+     "counter_type": "",
+     "split_length": 3,
+     },
 ]
 
 IDS_TO_FLUSH = (
