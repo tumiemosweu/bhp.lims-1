@@ -973,6 +973,8 @@ def fix_analyses_storage_instrument(portal):
     cat = api.search(query, "bika_setup_catalog")
     if not cat:
         logger.warn("Category 'Storage requisition' not found [SKIP]")
+        return
+
     cat_uid = api.get_uid(cat[0])
 
     # Cleanup analysis services first
