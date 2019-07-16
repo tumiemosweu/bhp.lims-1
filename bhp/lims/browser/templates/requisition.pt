@@ -38,7 +38,7 @@
         }
         .lab-title {
           font-weight:bold;
-          font-size:14pt;
+          font-size:12pt;
           margin-right: 30px;
           margin-left:-40px;
         }
@@ -57,15 +57,17 @@
           border:1px solid #333;
           border-radius:10px;
           width:36%;
+          height:255px;
         }
         #section_2 {
-          height:290px;
+          height:255px;
           float:left;
           padding:15px;
         }
         #section_5 {
           width:76%;
           padding:22px;
+          height:100px;
         }
 
         .clearfix {
@@ -81,7 +83,7 @@
           padding-bottom:2px;
         }
         .field .value {
-          font-size:14pt;
+          font-size:10pt;
           border:1px solid #cdcdcd;
           padding:3px 5px;
           text-transform:uppercase;
@@ -93,7 +95,7 @@
           float:left;
         }
         #dateOfBirth{
-          margin-top:30px;
+          margin-top:20px;
         }
         .page-body{
           margin-left:-65px;
@@ -139,19 +141,18 @@
             PRINCESS MARINA HOSPITAL<br/>GABORONE, BOTSWANA * TEL 3902671 EXT2126/2105
           </div>
           <div>
-            <h1 class="document_title">Analysis Request Form</h1>
+            <h3 class="document_title">Analysis Request Form</h3>
           </div>
         </div>
         <div class="header-part site-info">
-          <img tal:attributes="src python:view.get_barcode(analysisrequest);"
-               style="width:200px">
+          <img tal:attributes="src python:view.get_barcode(analysisrequest)" style="width:200px">
         </div>
         <div class="clearfix"></div>
       </div>
 
       <div class="page-body">
         <div class="section" >
-          <h1>Section 1: Participant information</h1>
+          <h2>Section 1: Participant information</h2>
           <div class="field-line">
             <div class="field">
               <div class="label" id="participant_id">Participant ID</div>
@@ -189,7 +190,7 @@
         </div>
         <div class="section" id="section_2">
 
-          <h1>Section 2: Specimen information</h1>
+          <h2>Section 2: Specimen information</h2>
           <div class="field-line">
             <div class="field">
               <div class="label">Date Specimen Drawn</div>
@@ -213,12 +214,12 @@
           <div class="field-line">
             <div class="field">
               <div class="label">Client Sample ID</div>
-              <div class="value" tal:content="python: view.get(analysisrequest, 'ClientSampleID') or ''"></div>
+                  <div class="value" tal:content="python: view.get(analysisrequest, 'ClientSampleID') or ''"></div>
             </div>
           </div>
         </div>
         <div class="section">
-          <h1>Section 3: Site information</h1>
+          <h2>Section 3: Site information</h2>
           <div class="field-line">
             <div class="field">
               <div class="label">Client ID</div>
@@ -229,28 +230,33 @@
               <div class="value" tal:content="python: client.getTaxNumber()"></div>
             </div>
             <div class="clearfix"></div>
-            <h2>Clinician: <span tal:condition="python: contact and len(contact) > 1"
-                                          tal:content="python: contact"></span></h2>
-            <h2>Study coordinator <br/>
+            <h3>Clinician: <span tal:condition="python: contact and len(contact) > 1"
+                                          tal:content="python: contact"></span></h3>
+            <h3>Study coordinator <br/>
               <span tal:content="python: client.Title()"></span>
               <br/>
               <span>Botswana - Harvard Partnership</span>
               <br/>
               <span>Tel: </span><span tal:content="python: client.getPhone()"></span>
-            </h2>
+            </h3>
           </div>
         </div>
         <div class="section">
-          <h1>Section 4: Requisition</h1>
+          <h2>Section 4: Requisition</h2>
           <div class="field-line">
             <div class="field">
               <div class="label">Analyses</div>
               <div>
               <tal:service tal:repeat="analysis python: analysisrequest.getAnalyses(full_objects=True)">
                 <div class="analysis"
-                     tal:condition="python: not analysis.getHidden() and view.get(analysis, 'Category') != 'Hematology'"
-                     tal:content="python: analysis.Title() + ' (' + analysis.Keyword+')'" ></div>
+                     tal:condition="python: not analysis.getHidden() and view.get(analysisrequest,'Template').Title() != 'Complete Blood Count (CBC)' "
+                     tal:content="python: analysis.Title() + ' (' + analysis.Keyword+') '" >
+                </div>
               </tal:service>
+                  <div tal:condition="python: view.get(analysisrequest,'Template').Title() == 'Complete Blood Count (CBC)' "
+                     tal:content="python: 'Complete Blood Count (CBC)'" >
+
+                  </div>
               </div>
             </div>
           </div>
@@ -263,7 +269,7 @@
         </div>
         <div class="clearfix"></div>
         <div class="section" id="section_5">
-          <h1>Section 5: Clinical information (Provide any notes if needed)</h1>
+          <h2>Section 5: Clinical information (Provide any notes if needed)</h2>
           <div class="field-line">
             <div class="field">
                 <p tal:content="python: view.get(analysisrequest,'OtherInformation')"></p>
