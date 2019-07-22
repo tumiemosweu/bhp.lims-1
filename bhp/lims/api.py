@@ -165,12 +165,22 @@ def is_in_panic_range(brain_or_object):
     panic_min = result_range.get('minpanic', "")
     panic_min = is_floatable(panic_min) and to_float(panic_min) or None
     if panic_min is not None and result <= panic_min:
+        # The result is a detection limit?
+        obj = get_object(brain_or_object)
+        if obj.isUpperDetectionLimit() and result == panic_min:
+            # The result is above the panic min
+            return False
         return True
 
     # Above the max panic
     panic_max = result_range.get('maxpanic', "")
     panic_max = is_floatable(panic_max) and to_float(panic_max) or None
     if panic_max is not None and result >= panic_max:
+        # The result is a detection limit?
+        obj = get_object(brain_or_object)
+        if obj.isLowerDetectionLimit() and result == panic_max:
+            # The result is below the panic max
+            return False
         return True
 
     # Not in panic
