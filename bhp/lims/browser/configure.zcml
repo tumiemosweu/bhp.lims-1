@@ -185,4 +185,14 @@
     permission="zope.Public"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!--
+  Import of specifications from xlsx
+  -->
+  <browser:page
+    for="*"
+    name="import_specs"
+    class=".import_specs.ImportSpecificationsView"
+    permission="zope.Public"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+
 </configure>
