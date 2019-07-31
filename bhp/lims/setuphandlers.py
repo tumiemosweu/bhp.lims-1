@@ -166,7 +166,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_at_reception": {
                 "title": "At reception",
                 "description": "Sample at reception",
-                "transitions": ("send_to_pot", "process", "reject", "store"),
+                "transitions": ("send_to_pot", "process", "reject", "dettach", "store",),
                 "permissions_copy_from": "sample_due",
             },
 
@@ -174,6 +174,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_due": {
                 "title": "Sent to point of testing",
                 "description": "Sample sent to point of testing",
+                "transitions": ("dettach", "store"),
                 "preserve_transitions": True,
             },
 
@@ -181,8 +182,28 @@ WORKFLOWS_TO_UPDATE = {
             "sample_received": {
                 "title": "At point of testing",
                 "description": "Sample at point of testing",
+                "transitions": ("dettach",),
                 "preserve_transitions": True,
             },
+
+            # To be verified
+            "to_be_verified": {
+                "transitions": ("dettach",),
+                "preserve_transitions": True,
+            },
+
+            # Verified
+            "verified": {
+                "transitions": ("dettach",),
+                "preserve_transitions": True,
+            },
+
+            # Stored
+            "stored": {
+                "transitions": ("dettach",),
+                "preserve_transitions": True,
+            }
+
         },
         "transitions": {
             # Clinic submits the sample (Add form)
@@ -245,6 +266,16 @@ WORKFLOWS_TO_UPDATE = {
                 }
             },
 
+            # Dettach a partition from it's parent sample
+            "dettach": {
+                "title": "Dettach partition",
+                "new_state": "",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "python:here.guard_dettach()"
+                }
+            }
         }
     }
 }
@@ -258,7 +289,8 @@ ROLE_MAPPINGS = [
               "sample_shipped",
               "sample_at_reception",
               "sample_due",
-              "sample_received"]),
+              "sample_received",
+              "stored"]),
      CATALOG_ANALYSIS_REQUEST_LISTING)
 ]
 

@@ -272,6 +272,18 @@ fields = [
             showOn=False,
         ),
     ),
+    ExtReferenceField(
+        "DettachedFrom",
+        required=0,
+        allowed_types=("AnalysisRequest",),
+        relationship="AnalysisRequestDettachedFrom",
+        mode="rw",
+        read_permission=View,
+        write_permission=ModifyPortalContent,
+        widget=ReferenceWidget(
+            visible=False,
+        )
+    ),
     ExtBooleanField(
         "PanicEmailAlertSent",
         default=False,

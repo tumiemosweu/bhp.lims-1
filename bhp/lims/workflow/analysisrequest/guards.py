@@ -75,3 +75,15 @@ def guard_receive_at_pot(analysis_request):
 
     # Do not allow if the current user is a Client contact
     return not api.is_client_contact()
+
+
+@security.public
+def guard_dettach(analysis_request):
+    """Guard dettach partition
+    """
+    # Dettach transition can only be done to partitions
+    if not analysis_request.isPartition():
+        return False
+    # If the current user is a Client contact, do not allow to dettach
+    return not api.is_client_contact()
+
