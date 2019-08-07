@@ -14,13 +14,10 @@ class MyFirstView(BrowserView):
 
         query = dict(
             portal_type="Client",
+            sort_on="sortable_title",
+            sort_order="ascending",
             is_active=True,)
 
         brains = api.search(query, "portal_catalog")
-        for brain in brains:
-            client_id_from_brain = brain.getClientID
-            client_id_from_object = api.get_object(brain).getClientID()
-            logger.info("{} == {}".format(client_id_from_brain, client_id_from_object))
-
         titles = map(api.get_title, brains)
-        return ", ".join(titles)
+        return ", ".join(titles) or "No results"
