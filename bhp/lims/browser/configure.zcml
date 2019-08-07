@@ -55,6 +55,14 @@
     permission="zope2.View"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
+  <!-- View for training purposes -->
+  <browser:page
+    for="*"
+    name="training"
+    class=".training.MyFirstView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+
   <!--
   Delivery (checklist) report (PDF)
   -->
