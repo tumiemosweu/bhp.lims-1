@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="bhp">
+<head>
+  <style>
+
+  </style>
+</head>
+<body>
+  <div tal:define="my_clients python:view.clients">
+
+    <div tal:condition="python: my_clients">
+      <h1>There are some clients</h1>
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <th>Title</th>
+          <th>Client ID</th>
+        </tr>
+        <tr tal:repeat="client my_clients">
+          <td tal:content="python: client.Title()"></td>
+          <td tal:content="python: client.getClientID()"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div tal:condition="python: len(my_clients) == 0">
+      No clients found
+    </div>
+  </div>
+</body>
