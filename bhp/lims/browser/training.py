@@ -1,4 +1,5 @@
 from Products.Five.browser import BrowserView
+from bika.lims import api
 
 
 class MyFirstView(BrowserView):
@@ -9,4 +10,11 @@ class MyFirstView(BrowserView):
         self.request = request
 
     def __call__(self, *args, **kwargs):
-        return "Say hi"
+
+        query = dict(
+            portal_type="Client",
+            is_active=True,)
+
+        results = api.search(query, "portal_catalog")
+        titles = map(api.get_title, results)
+        return ", ".join(titles)
