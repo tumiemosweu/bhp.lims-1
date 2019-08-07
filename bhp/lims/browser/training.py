@@ -1,4 +1,5 @@
 from Products.Five.browser import BrowserView
+from bhp.lims import logger
 from bika.lims import api
 
 
@@ -15,6 +16,11 @@ class MyFirstView(BrowserView):
             portal_type="Client",
             is_active=True,)
 
-        results = api.search(query, "portal_catalog")
-        titles = map(api.get_title, results)
+        brains = api.search(query, "portal_catalog")
+        for brain in brains:
+            client_id_from_brain = brain.getClientID
+            client_id_from_object = api.get_object(brain).getClientID()
+            logger.info("{} == {}".format(client_id_from_brain, client_id_from_object))
+
+        titles = map(api.get_title, brains)
         return ", ".join(titles)
