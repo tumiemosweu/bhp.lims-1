@@ -143,6 +143,31 @@ ADD_AR_FIELDS_SORTED = [
 ]
 
 WORKFLOWS_TO_UPDATE = {
+    "senaite_client_workflow": {
+        "permissions": (),
+        "states": {
+            "prospective": {
+                "title": "Prospective",
+                "description": "Prospective client",
+                "transitions": ("deactivate", "activate"),
+                "permissions_copy_from": "active",
+            },
+            "active": {
+                "transitions": ("make_prospective", "deactivate")
+            },
+        },
+        "transitions": {
+            "make_prospective": {
+                "title": "Make prospective",
+                "new_state": "prospective",
+                "guard": {
+                    "guard_permissions": "",
+                    "guard_roles": "",
+                    "guard_expr": "",
+                }
+            },
+        }
+    },
     "bika_ar_workflow": {
         "permissions": (),
         "states": {
@@ -366,7 +391,7 @@ def setup_handler(context):
     update_services_percentage_keyword(portal)
 
     # Import specifications from bhp/lims/resources/results_ranges.xlsx
-    import_specifications(portal)
+    #import_specifications(portal)
 
     # Assign the specifications to ARs with missing specs
     fix_analysis_requests_without_specifications(portal)
