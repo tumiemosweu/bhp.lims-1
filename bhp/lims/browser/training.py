@@ -4,7 +4,7 @@ from DateTime import DateTime
 from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from bhp.lims import logger
-from bika.lims import api
+from bhp.lims import api
 
 
 class MyFirstView(BrowserView):
@@ -54,9 +54,12 @@ class MyFirstView(BrowserView):
         output = StringIO()
         lines = []
         for client in self.clients:
-            lines.append([client.Title(), client.getClientID()])
+            client_title = client.Title()
+            client_id = client.getClientID()
+            client_commercial = api.get_field_value(client, "CommercialName", "")
+            lines.append([client_title, client_commercial, client_id])
 
-        header = ["Title", "Client ID"]
+        header = ["Title", "Commercial Name", "Client ID"]
         lines.insert(0, header)
         for line in lines:
             output.write(",".join(line) + "\n")
