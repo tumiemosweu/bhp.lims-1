@@ -43,6 +43,26 @@
               <td tal:content="python: client.getClientID()"></td>
             </tr>
           </table>
+
+          <form class="form"
+                id="my_form"
+                name="my_form"
+                method="POST">
+
+            <!-- Hidden Fields -->
+            <input type="hidden" name="submitted" value="1"/>
+            <input tal:replace="structure context/@@authenticator/authenticator"/>
+
+            <!-- Form Controls -->
+            <div>
+              <!-- Export list to csv -->
+              <input class="btn btn-info btn-sm"
+                     type="submit"
+                     name="button_to_csv"
+                     i18n:attributes="value"
+                     value="Export to CSV"/>
+            </div>
+          </form>
         </div>
 
         <div tal:condition="python: len(my_clients) == 0">

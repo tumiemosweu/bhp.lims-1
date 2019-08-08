@@ -1,3 +1,6 @@
+from StringIO import StringIO
+
+from DateTime import DateTime
 from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from bhp.lims import logger
@@ -22,6 +25,19 @@ class MyFirstView(BrowserView):
 
     def __call__(self, *args, **kwargs):
         logger.info("Rendering MyFirstView ...")
+        form = self.request.form
+
+        # Form submit toggle
+        form_submitted = form.get("submitted", False)
+
+        # Buttons
+        form_to_csv = form.get("button_to_csv", False)
+
+        # Handle export to csv
+        if form_submitted and form_to_csv:
+            logger.info("*** Exporting to CSV ***")
+            return self.get_csv()
+
         return self.template()
 
     def search(self):
@@ -33,3 +49,15 @@ class MyFirstView(BrowserView):
 
         brains = api.search(query, "portal_catalog")
         return map(api.get_object, brains)
+
+    def get_csv(self):
+        output = StringIO()
+        lines = []
+        for client in self.clients:
+            lines.append([client.Title(), client.getClientID()])
+
+        header = ["Title", "Client ID"]
+        lines.insert(0, header)
+        for line in lines:
+            output.write(",".join(line) + "\n")
+        return output.getvalue()
