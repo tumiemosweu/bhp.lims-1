@@ -43,6 +43,12 @@ CODES = DisplayList((
     ('delivery','Delivery')
 ))
 
+CLIENTS_TYPES = DisplayList((
+    ('new', "New client"),
+    ("old", "Old client"),
+    ("privileged", "Privileged client")
+))
+
 GRADES_KEYS = (
     "G1_low_min",
     "G1_low_max",

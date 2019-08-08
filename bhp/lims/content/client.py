@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018-2019 Botswana Harvard Partnership (BHP)
-from Products.Archetypes.Widget import StringWidget
+from Products.Archetypes.Widget import StringWidget, SelectionWidget
 from Products.CMFCore.permissions import View, ModifyPortalContent
 from archetypes.schemaextender.interfaces import ISchemaModifier, \
     IOrderableSchemaExtender
+from bhp.lims.config import CLIENTS_TYPES
 from bika.lims import bikaMessageFactory as _
 from bika.lims.fields import ExtStringField
 from bika.lims.interfaces import IClient
@@ -21,7 +22,20 @@ fields = [
         widget=StringWidget(
             label=_("Commercial Name")
         )
+    ),
+
+    ExtStringField(
+        "ClientType",
+        required=0,
+        read_permission=View,
+        write_permission=ModifyPortalContent,
+        vocabulary=CLIENTS_TYPES,
+        widget=SelectionWidget(
+            format="select",
+            label=_("Client type"),
+        )
     )
+
 ]
 
 class ClientSchemaExtender(object):
