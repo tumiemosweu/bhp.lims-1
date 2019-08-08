@@ -83,4 +83,6 @@ def after_dettach(analysis_request):
     # And we add the marker IDettachedPartition
     alsoProvides(analysis_request, IDettachedPartition)
 
+    # Reindex both the parent and the one we've detached
     analysis_request.reindexObject()
+    parent.reindexObject()
