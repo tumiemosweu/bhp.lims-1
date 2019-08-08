@@ -100,6 +100,15 @@
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
+  Subscriber adapters for clients listing
+  -->
+  <subscriber
+    for="bika.lims.browser.clientfolder.ClientFolderContentsView
+         bika.lims.interfaces.IClientFolder"
+    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    factory=".clients.ClientsListingViewAdapter" />
+
+  <!--
   Samples listing with additional filters and columns
   -->
   <subscriber
