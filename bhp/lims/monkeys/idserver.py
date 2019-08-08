@@ -5,6 +5,7 @@
 from DateTime import DateTime
 from Products.ATContentTypes.utils import DT2dt
 from bhp.lims import api
+from bhp.lims.interfaces import IDettachedPartition
 from bika.lims.alphanumber import Alphanumber
 from bika.lims.idserver import AR_TYPES
 from bika.lims.idserver import get_current_year
@@ -53,17 +54,24 @@ def get_variables(context, **kw):
 
         # Partition
         if portal_type == "AnalysisRequestPartition":
+            # 09202AAJ60
+            # + 09202AAJ6002
+            #   + 09202AAJ600201
+            # {studyId}{sampleType}{parent_alpha}{partition_count}
+            #     09        20         AAJ60          02
             parent_ar = context.getParentAnalysisRequest()
             parent_ar_id = api.get_id(parent_ar)
             parent_base_id = strip_suffix(parent_ar_id)
             partition_count = get_partition_count(context)
+            parent_alpha = get_sample_alpha(parent_ar)
+            parent_part_num = get_sample_partition_number(parent_ar)
             variables.update({
                 "parent_analysisrequest": parent_ar,
                 "parent_ar_id": parent_ar_id,
                 "parent_base_id": parent_base_id,
                 # BHP-specific
                 "partition_count": "{:02d}".format(partition_count+1),
-                "parent_alpha": get_sample_alpha(parent_ar),
+                "parent_alpha": "{}{}".format(parent_alpha, parent_part_num),
             })
 
         # Retest
@@ -116,3 +124,16 @@ def get_sample_alpha(sample):
     prefix = "{}{}".format(study_id, sample_type)
     len_prefix = len(prefix)
     return sample_id[len_prefix:len_prefix+5]
+
+
+def get_sample_partition_number(sample):
+    """Returns the partition number of the sample if is a Partition or a
+    Dettached partition when the format id for the given sample matches with
+    '{studyId}{sampleType}{alpha:3a2d}{test_count}'
+    """
+    sample_id = api.get_id(sample)
+    study_id = sample.aq_parent.getTaxNumber()
+    sample_type = sample.getSampleType().getPrefix()
+    prefix = "{}{}".format(study_id, sample_type)
+    len_prefix = len(prefix)
+    return sample_id[len_prefix+5:]

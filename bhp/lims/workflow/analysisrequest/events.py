@@ -4,8 +4,11 @@
 
 from bhp.lims import api
 from bhp.lims.browser.requisition import generate_requisition_pdf
+from bhp.lims.interfaces import IDettachedPartition
 from bika.lims import workflow as wf
+from bika.lims.interfaces import IAnalysisRequestPartition
 from bika.lims.workflow.analysisrequest import events
+from zope.interface.declarations import noLongerProvides, alsoProvides
 
 
 def after_no_sampling_workflow(analysis_request):
@@ -73,3 +76,11 @@ def after_dettach(analysis_request):
     parent = analysis_request.getParentAnalysisRequest()
     analysis_request.setParentAnalysisRequest(None)
     api.set_field_value(analysis_request, "DettachedFrom", parent)
+
+    # We unmark this analysis request as a Partition
+    noLongerProvides(analysis_request, IAnalysisRequestPartition)
+
+    # And we add the marker IDettachedPartition
+    alsoProvides(analysis_request, IDettachedPartition)
+
+    analysis_request.reindexObject()

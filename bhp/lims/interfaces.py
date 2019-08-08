@@ -45,3 +45,7 @@ class IReferralLabs(Interface):
 class IReferralLab(Interface):
     """Marker interface for a ReferralLab
     """
+
+class IDettachedPartition(Interface):
+    """Marker interface for Partitions that have been dettached
+    """
