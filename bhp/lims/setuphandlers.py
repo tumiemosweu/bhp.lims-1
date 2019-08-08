@@ -163,7 +163,7 @@ WORKFLOWS_TO_UPDATE = {
                 "guard": {
                     "guard_permissions": "",
                     "guard_roles": "",
-                    "guard_expr": "",
+                    "guard_expr": "python:here.guard_make_prospective()",
                 }
             },
         }

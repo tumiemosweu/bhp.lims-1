@@ -22,6 +22,7 @@ from config import PRODUCT_NAME
 # used to access the module. Thus, all the modules from the path passed in to
 # `allow_module` will be available.
 allow_module('bhp.lims.workflow.analysisrequest.guards')
+allow_module('bhp.lims.workflow.client.guards')
 
 # Defining a Message Factory for when this product is internationalized.
 bhpMessageFactory = MessageFactory('bhp')
