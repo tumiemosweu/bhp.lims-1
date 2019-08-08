@@ -60,7 +60,7 @@
     for="*"
     name="training"
     class=".training.MyFirstView"
-    permission="zope.Public"
+    permission="zope2.View"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--

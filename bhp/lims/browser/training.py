@@ -1,7 +1,7 @@
 from Products.Five.browser import BrowserView
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from bhp.lims import logger
 from bika.lims import api
-from z3c.pt.pagetemplate import ViewPageTemplateFile
 
 
 class MyFirstView(BrowserView):
@@ -12,6 +12,7 @@ class MyFirstView(BrowserView):
         self.context = context
         self.request = request
         self._clients = None
+        self.request.set("disable_border", 1)
 
     @property
     def clients(self):
@@ -20,6 +21,7 @@ class MyFirstView(BrowserView):
         return self._clients
 
     def __call__(self, *args, **kwargs):
+        logger.info("Rendering MyFirstView ...")
         return self.template()
 
     def search(self):
