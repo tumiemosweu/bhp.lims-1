@@ -16,6 +16,7 @@
     <adapter factory=".sampletype.SampleTypeSchemaExtender" />
 
     <!-- Client -->
+    <adapter factory=".client.ClientSchemaExtender" />
     <adapter factory=".client.ClientSchemaModifier" />
 
     <!-- Analysis Specifications -->
