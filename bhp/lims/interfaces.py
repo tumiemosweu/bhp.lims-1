@@ -46,6 +46,12 @@ class IReferralLab(Interface):
     """Marker interface for a ReferralLab
     """
 
+# TODO REMOVE
+class IDettachedPartition(Interface):
+    """Marker interface for Partitions that have been detached
+    """
+
+
 class IDetachedPartition(Interface):
     """Marker interface for Partitions that have been detached
     """

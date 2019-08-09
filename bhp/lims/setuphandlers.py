@@ -12,6 +12,7 @@ from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
 from bhp.lims.config import GRADES_KEYS
+from bhp.lims.interfaces import IDettachedPartition, IDetachedPartition
 from bhp.lims.specscalculations import get_xls_specifications
 from bika.lims.browser.analysisrequest.add2 import AR_CONFIGURATION_STORAGE
 from bika.lims.catalog.analysis_catalog import CATALOG_ANALYSIS_LISTING
@@ -19,13 +20,15 @@ from bika.lims.catalog.analysisrequest_catalog import \
     CATALOG_ANALYSIS_REQUEST_LISTING
 from bika.lims.catalog.catalog_utilities import addZCTextIndex
 from bika.lims.idserver import renameAfterCreation
-from bika.lims.interfaces import INumberGenerator
+from bika.lims.interfaces import INumberGenerator, IAnalysisRequestPartition
 from bika.lims.utils import tmpID
 from bika.lims.workflow import getTransitionDate
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
 
 # Number of objects before commit transaction
+from zope.interface.declarations import noLongerProvides, alsoProvides
+
 TRANSACTION_THERESHOLD = 1000
 
 PROFILE_STEPS = [
@@ -398,6 +401,9 @@ def setup_handler(context):
     # Set the date the Sample was received at the lab, not at point of testing
     # https://github.com/bhp-lims/bhp.lims/issues/233
     fix_i233(portal)
+
+    # Renaming of IDettached interface to IDettached
+    fix_idetached(portal)
 
     logger.info("BHP setup handler [DONE]")
 
@@ -1257,3 +1263,38 @@ def fix_i233(portal):
             sample.reindexObject(idxs=["getDateReceived", "is_received"])
 
     logger.info("Reseting Date Received (#233) [DONE]")
+
+
+def fix_idetached(portal):
+    """Ensures IDetached is used instead of IDettached
+    """
+    logger.info("Fixing IDetached ...")
+    search = dict(portal_type="AnalysisRequest")
+    brains = api.search(search, CATALOG_ANALYSIS_REQUEST_LISTING)
+    total = len(brains)
+    for num, brain in enumerate(brains):
+        if num % 100 == 0:
+            logger.info("Fixing IDetached: {}/{}".format(num, total))
+        if num % TRANSACTION_THERESHOLD == 0:
+            commit_transaction(portal)
+
+        sample = api.get_object(brain)
+        back_refs = sample.getBackReferences("AnalysisRequestDettachedFrom")
+        for back_ref in back_refs:
+            api.set_field_value(back_ref, "DetachedFrom", sample)
+            back_ref.reindexObject()
+            sample.reindexObject()
+
+        if IDettachedPartition.providedBy(sample):
+            noLongerProvides(sample, IDettachedPartition)
+            alsoProvides(sample, IDetachedPartition)
+            if IAnalysisRequestPartition.providedBy(sample):
+                noLongerProvides(sample, IAnalysisRequestPartition)
+            sample.reindexObject()
+
+        elif IDetachedPartition.providedBy(sample):
+            if IAnalysisRequestPartition.providedBy(sample):
+                noLongerProvides(sample, IAnalysisRequestPartition)
+                sample.reindexObject()
+
+    logger.info("Fixing IDetached [DONE]")
