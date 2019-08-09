@@ -66,4 +66,12 @@
     replacement=".browser.analysisrequest.add2.get_records"
   />
 
+  <!-- Analysis Request's create_partitions (omit DettachedFrom on copy) -->
+  <monkey:patch
+    description=""
+    class="bika.lims.utils.analysisrequest"
+    original="create_partition"
+    replacement=".utils.analysisrequest.create_partition"
+  />
+
 </configure>
