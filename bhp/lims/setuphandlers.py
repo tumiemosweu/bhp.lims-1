@@ -182,7 +182,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_received": {
                 "title": "At point of testing",
                 "description": "Sample at point of testing",
-                "transitions": ("dettach",),
+                "transitions": ("dettach", "store"),
                 "preserve_transitions": True,
             },
 
