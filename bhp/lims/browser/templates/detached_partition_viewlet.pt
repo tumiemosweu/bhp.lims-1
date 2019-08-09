@@ -1,5 +1,5 @@
 <div tal:omit-tag=""
-     tal:define="primary python: view.get_dettached_from()"
+     tal:define="primary python: view.get_detached_from()"
      tal:condition="python: primary"
      i18n:domain="bhp.lims">
 
@@ -12,7 +12,7 @@
       </button>
       <strong i18n:translate="">Info</strong>
       <p class="title">
-        <span i18n:translate="">This is a Dettached partition from Sample </span>
+        <span i18n:translate="">This is a detached partition from Sample </span>
         <a tal:attributes="href python:primary.absolute_url()"
            tal:content="python:primary.getId()"></a>
       </p>

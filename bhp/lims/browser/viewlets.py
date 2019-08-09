@@ -41,20 +41,20 @@ class PanicAlertViewlet(ViewletBase):
         return self.template()
 
 
-class DettachedPartitionViewlet(ViewletBase):
+class DetachedPartitionViewlet(ViewletBase):
     """Prints a viewlet that displays the Primary Sample the sample was
-    dettached from
+    detached from
     """
-    template = ViewPageTemplateFile("templates/dettached_partition_viewlet.pt")
+    template = ViewPageTemplateFile("templates/detached_partition_viewlet.pt")
 
     def __init__(self, context, request, view, manager=None):
-        super(DettachedPartitionViewlet, self).__init__(
+        super(DetachedPartitionViewlet, self).__init__(
             context, request, view, manager=manager)
 
-    def get_dettached_from(self):
-        """Returns the sample the partition was dettached from
+    def get_detached_from(self):
+        """Returns the sample the partition was detached from
         """
-        return api.get_field_value(self.context, "DettachedFrom", None)
+        return api.get_field_value(self.context, "DetachedFrom", None)
 
     def render(self):
         return self.template()

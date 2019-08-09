@@ -137,14 +137,14 @@
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
-  Dettached Partition viewlet
+  Detached Partition viewlet
   -->
   <browser:viewlet
     for="bika.lims.interfaces.IAnalysisRequest"
-    name="bhp.lims.dettached_partition_viewlet"
-    class=".viewlets.DettachedPartitionViewlet"
+    name="bhp.lims.detached_partition_viewlet"
+    class=".viewlets.DetachedPartitionViewlet"
     manager="plone.app.layout.viewlets.interfaces.IAboveContent"
-    template="templates/dettached_partition_viewlet.pt"
+    template="templates/detached_partition_viewlet.pt"
     permission="zope2.View"
     layer="bhp.lims.interfaces.IBhpLIMS" />
 

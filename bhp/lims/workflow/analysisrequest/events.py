@@ -4,7 +4,7 @@
 
 from bhp.lims import api
 from bhp.lims.browser.requisition import generate_requisition_pdf
-from bhp.lims.interfaces import IDettachedPartition
+from bhp.lims.interfaces import IDetachedPartition
 from bika.lims import workflow as wf
 from bika.lims.interfaces import IAnalysisRequestPartition
 from bika.lims.workflow.analysisrequest import events
@@ -69,19 +69,19 @@ def after_receive(analysis_request):
     events.do_action_to_descendants(analysis_request, "receive")
 
 
-def after_dettach(analysis_request):
+def after_detach(analysis_request):
     """Method triggered after "dettach" transition for the Analysis Request
     passed in is performed
     """
     parent = analysis_request.getParentAnalysisRequest()
     analysis_request.setParentAnalysisRequest(None)
-    api.set_field_value(analysis_request, "DettachedFrom", parent)
+    api.set_field_value(analysis_request, "DetachedFrom", parent)
 
     # We unmark this analysis request as a Partition
     noLongerProvides(analysis_request, IAnalysisRequestPartition)
 
-    # And we add the marker IDettachedPartition
-    alsoProvides(analysis_request, IDettachedPartition)
+    # And we add the marker IDetachedPartition
+    alsoProvides(analysis_request, IDetachedPartition)
 
     # Reindex both the parent and the one we've detached
     analysis_request.reindexObject()

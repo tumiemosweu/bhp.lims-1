@@ -273,10 +273,10 @@ fields = [
         ),
     ),
     ExtReferenceField(
-        "DettachedFrom",
+        "DetachedFrom",
         required=0,
         allowed_types=("AnalysisRequest",),
-        relationship="AnalysisRequestDettachedFrom",
+        relationship="AnalysisRequestDetachedFrom",
         mode="rw",
         read_permission=View,
         write_permission=ModifyPortalContent,

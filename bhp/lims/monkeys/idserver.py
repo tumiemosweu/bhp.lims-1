@@ -5,7 +5,7 @@
 from DateTime import DateTime
 from Products.ATContentTypes.utils import DT2dt
 from bhp.lims import api
-from bhp.lims.interfaces import IDettachedPartition
+from bhp.lims.interfaces import IDetachedPartition
 from bika.lims.alphanumber import Alphanumber
 from bika.lims.idserver import AR_TYPES
 from bika.lims.idserver import get_current_year
@@ -128,7 +128,7 @@ def get_sample_alpha(sample):
 
 def get_sample_partition_number(sample):
     """Returns the partition number of the sample if is a Partition or a
-    Dettached partition when the format id for the given sample matches with
+    Detached partition when the format id for the given sample matches with
     '{studyId}{sampleType}{alpha:3a2d}{test_count}'
     """
     sample_id = api.get_id(sample)
