@@ -2,7 +2,7 @@
 #
 # Copyright 2018-2019 Botswana Harvard Partnership (BHP)
 
-## Script (Python) "guard_dettach"
+## Script (Python) "guard_detach"
 ##bind container=container
 ##bind context=context
 ##bind namespace=
@@ -12,5 +12,5 @@
 ##title=
 ##
 
-from bhp.lims.workflow.analysisrequest.guards import guard_dettach
-return guard_dettach(context)
+from bhp.lims.workflow.analysisrequest.guards import guard_detach
+return guard_detach(context)

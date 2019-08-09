@@ -70,7 +70,7 @@ def after_receive(analysis_request):
 
 
 def after_detach(analysis_request):
-    """Method triggered after "dettach" transition for the Analysis Request
+    """Method triggered after "detach" transition for the Analysis Request
     passed in is performed
     """
     parent = analysis_request.getParentAnalysisRequest()

@@ -78,12 +78,12 @@ def guard_receive_at_pot(analysis_request):
 
 
 @security.public
-def guard_dettach(analysis_request):
-    """Guard dettach partition
+def guard_detach(analysis_request):
+    """Guard detach partition
     """
-    # Dettach transition can only be done to partitions
+    # Detach transition can only be done to partitions
     if not analysis_request.isPartition():
         return False
-    # If the current user is a Client contact, do not allow to dettach
+    # If the current user is a Client contact, do not allow to detach
     return not api.is_client_contact()
 

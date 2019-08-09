@@ -169,7 +169,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_at_reception": {
                 "title": "At reception",
                 "description": "Sample at reception",
-                "transitions": ("send_to_pot", "process", "reject", "dettach", "store",),
+                "transitions": ("send_to_pot", "process", "reject", "detach", "store",),
                 "permissions_copy_from": "sample_due",
             },
 
@@ -177,7 +177,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_due": {
                 "title": "Sent to point of testing",
                 "description": "Sample sent to point of testing",
-                "transitions": ("dettach", "store"),
+                "transitions": ("detach", "store"),
                 "preserve_transitions": True,
             },
 
@@ -185,25 +185,25 @@ WORKFLOWS_TO_UPDATE = {
             "sample_received": {
                 "title": "At point of testing",
                 "description": "Sample at point of testing",
-                "transitions": ("dettach", "store"),
+                "transitions": ("detach", "store"),
                 "preserve_transitions": True,
             },
 
             # To be verified
             "to_be_verified": {
-                "transitions": ("dettach",),
+                "transitions": ("detach",),
                 "preserve_transitions": True,
             },
 
             # Verified
             "verified": {
-                "transitions": ("dettach",),
+                "transitions": ("detach",),
                 "preserve_transitions": True,
             },
 
             # Stored
             "stored": {
-                "transitions": ("dettach",),
+                "transitions": ("detach",),
                 "preserve_transitions": True,
             }
 
@@ -269,14 +269,14 @@ WORKFLOWS_TO_UPDATE = {
                 }
             },
 
-            # Dettach a partition from it's parent sample
-            "dettach": {
-                "title": "Dettach partition",
+            # Detach a partition from it's parent sample
+            "detach": {
+                "title": "Detach partition",
                 "new_state": "",
                 "guard": {
                     "guard_permissions": "",
                     "guard_roles": "",
-                    "guard_expr": "python:here.guard_dettach()"
+                    "guard_expr": "python:here.guard_detach()"
                 }
             }
         }
@@ -402,7 +402,7 @@ def setup_handler(context):
     # https://github.com/bhp-lims/bhp.lims/issues/233
     fix_i233(portal)
 
-    # Renaming of IDettached interface to IDettached
+    # Renaming of IDettached interface to IDetached
     fix_idetached(portal)
 
     logger.info("BHP setup handler [DONE]")
