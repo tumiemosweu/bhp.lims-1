@@ -46,9 +46,7 @@ def after_deliver(analysis_request):
 def after_send_to_pot(analysis_request):
     """Event fired after sending to point of testing
     """
-    # Other partitions should not follow the partition that is sent to testing
-    # https://github.com/bhp-lims/bhp.lims/issues/246
-    #events.do_action_to_ancestors(analysis_request, "send_to_pot")
+    events.do_action_to_ancestors(analysis_request, "send_to_pot")
     events.do_action_to_descendants(analysis_request, "send_to_pot")
 
 

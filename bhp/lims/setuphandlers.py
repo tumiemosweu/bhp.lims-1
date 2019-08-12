@@ -166,7 +166,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_at_reception": {
                 "title": "At reception",
                 "description": "Sample at reception",
-                "transitions": ("send_to_pot", "process", "reject", "store"),
+                "transitions": ("send_to_pot", "process", "reject", "detach", "store",),
                 "permissions_copy_from": "sample_due",
             },
 
@@ -174,6 +174,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_due": {
                 "title": "Sent to point of testing",
                 "description": "Sample sent to point of testing",
+                "transitions": ("detach", "store"),
                 "preserve_transitions": True,
             },
 
@@ -181,6 +182,7 @@ WORKFLOWS_TO_UPDATE = {
             "sample_received": {
                 "title": "At point of testing",
                 "description": "Sample at point of testing",
+                "transitions": ("detach", "store"),
                 "preserve_transitions": True,
             },
         },
@@ -258,7 +260,8 @@ ROLE_MAPPINGS = [
               "sample_shipped",
               "sample_at_reception",
               "sample_due",
-              "sample_received"]),
+              "sample_received",
+              "stored"]),
      CATALOG_ANALYSIS_REQUEST_LISTING)
 ]
 
