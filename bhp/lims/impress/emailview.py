@@ -13,13 +13,16 @@ class EmailView(BaseEmailView):
 
     def __init__(self, context, request):
         super(EmailView, self).__init__(context, request)
+
+    @property
+    def email_subject(self):
         participant_ids = self.get_participant_ids()
-        self.email_subject = "Analysis Results for {}".format(", ".join(participant_ids))
+        return "Analysis Results for {}".format(", ".join(participant_ids))
 
     def get_participant_ids(self):
         """Participant IDs of the reports to be included in the email
         """
-        ars = map(lambda rep: rep.getAnalysisRequest(), self.get_reports())
+        ars = map(lambda rep: rep.getAnalysisRequest(), self.reports)
         pids = map(lambda ar: ar.ParticipantID, ars)
         return list(set(pids))
 
