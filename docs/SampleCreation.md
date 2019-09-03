@@ -8,6 +8,8 @@ https://addons.mozilla.org/en-US/firefox/addon/restclient/
 To beautify the JSON results, you might install JSON Lite for Firefox:
 https://addons.mozilla.org/en-US/firefox/addon/json-lite/?src=recommended
 
+`senaite.jsonapi` was developed using `plone.jsonapi.routes` as a reference. Thus, is strongly recommended to read the documentation for `plone.jsonapi.routes`, cause `senaite.jsonapi` works mostly the same way: https://plonejsonapiroutes.readthedocs.io/en/latest/
+
 ## Step-by-step guide (with example)
 
 ### Login to the system with a user with enough privileges
