@@ -82,6 +82,16 @@
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
+  POT Shipment View
+  -->
+  <browser:page
+    for="*"
+    name="pot_shipment"
+    class=".pot_shipment.POTShipmentView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+
+  <!--
   Couriers Listing
   -->
   <browser:page

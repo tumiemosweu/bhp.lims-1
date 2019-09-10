@@ -39,6 +39,18 @@ class WorkflowActionSendToLabAdapter(RequestContextAware):
         url = "{}/courier_shipment?uids={}".format(self.back_url, uids)
         return self.redirect(redirect_url=url)
 
+class WorkflowActionSendToPotAdapter(RequestContextAware):
+    """Adapter in charge of Analysis Request "send_to_pot" action
+    """
+    implements(IWorkflowActionUIDsAdapter)
+
+    def __call__(self, action, uids):
+        """Redirects the user to the point of testing shipment view
+        """
+        uids = ",".join(uids)
+        url = "{}/pot_shipment?uids={}".format(self.back_url, uids)
+        return self.redirect(redirect_url=url)
+
 
 class WorkflowActionMergedPDFs(WorkflowActionGenericAdapter):
 
