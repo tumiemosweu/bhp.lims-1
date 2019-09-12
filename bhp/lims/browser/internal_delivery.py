@@ -21,10 +21,11 @@ from bika.lims.utils import createPdf
 class InternalDeliveryFormPdf(BrowserView):
     template = ViewPageTemplateFile("templates/internal_delivery.pt")
 
-    def __init__(self, context, request, analysis_requests=None):
+    def __init__(self, context, request, analysis_requests=None, lab_department=None):
         super(InternalDeliveryFormPdf, self).__init__(context, request)
 
         self.analysis_requests = analysis_requests
+        self.lab_department = lab_department
         if not self.analysis_requests:
             if ISample.providedBy(context):
                 self.analysis_requests = context.getAnalysisRequests()
@@ -53,21 +54,22 @@ class InternalDeliveryFormPdf(BrowserView):
         img_str = img.read()
         return "data:image/png;base64,{}".format(b64encode(img_str))
 
-def generate_delivery_pdf(context, ars_or_samples):
+def generate_internal_delivery_pdf(context, ars_or_samples, lab_department):
+
     if not ars_or_samples:
         logger.warn("No Analysis Requests or Samples provided")
         return
 
     if ISample.providedBy(ars_or_samples) or \
         IAnalysisRequest.providedBy(ars_or_samples):
-        return generate_delivery_pdf(context, [ars_or_samples])
+        return generate_internal_delivery_pdf(context, [ars_or_samples], lab_department)
 
     if not isinstance(ars_or_samples, list):
         logger.warn("Type not supported: {}".format(repr(ars_or_samples)))
         return
 
     html = InternalDeliveryFormPdf(context, context.REQUEST,
-                           analysis_requests=ars_or_samples).template()
+                           analysis_requests=ars_or_samples, lab_department=lab_department).template()
     html = safe_unicode(html).encode("utf-8")
     filename = "internal_delivery"
     pdf_fn = tempfile.mktemp(suffix=".pdf")

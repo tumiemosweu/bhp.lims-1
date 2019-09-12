@@ -56,7 +56,7 @@
         }
         .site-info {
           font-weight:bold;
-          font-size:18pt;
+          font-size:15pt;
         }
         .header {
             text-align: center;
@@ -69,20 +69,19 @@
           margin-left: 0px;
         }
 
-         .header-part.site-info {
-          text-align:right;
-        }
         .header-part .barcode-container {
           width:25%;
         }
         .header-part.lab-title {
           text-align:center;
           width:45%;
-          margin-left:10px;
         }
         .header-part.site-info {
           text-align:right;
-          margin-left: -7px;
+          margin-top: 50px;
+          margin-right: 10px;
+          margin-left: -70px;
+
         }
         .line_comments {
             width: 50%;
@@ -104,7 +103,7 @@
 
         }
         .line_initials_site_personnel {
-            width: 30%;
+            width: 25%;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
@@ -113,7 +112,7 @@
 
         }
         .line_intials_personnel_delivering {
-            width: 26%;
+            width: 22%;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
@@ -133,10 +132,10 @@
             margin-top: -30px;
         }
         .departure{
-        margin-left:300px;
+        margin-left:250px;
         }
         .line_received_time {
-            width: 19%;
+            width: 20%;
             height: 47px;
             border-bottom: 1px solid black;
             position: fixed;
@@ -189,8 +188,8 @@
           </div>
         </div>
         <div class="header-part site-info">
-            <!-- <h5><span>BHP</span><span tal:content="python:client.getTaxNumber()"></span></h5>
-            <span tal:content="python:client.getClientID()"></span> -->
+            <h5> <span>Department: </span><span tal:content="python: view.lab_department.title"></span></h5>
+
         </div>
         <div class="clearfix"></div>
       </div>
@@ -255,10 +254,11 @@
         <h3 class="line_comments_continuation"></h3>
         <h3 class="initials">Sample Reception Staff Initials
             <span class="line_initials_site_personnel"></span>
+            <span class="departure">Departure Date & Time:<span class="line_depart_time"></span></span>
         </h3>
-        <h3>Courier Name:
+        <h3>Sample Reception Staff Name:
             <span class="line_intials_personnel_delivering"></span>
-            <span tal:content="python: view.get(analysisrequest[0],'Courier').Title()"></span>
+            <span tal:content="python: view.get(analysisrequest[0],'LabContact').Title()"></span>
         </h3>
         <h3>Testing Lab Staff Initials:
             <span class="line_initials_site_personnel"></span>

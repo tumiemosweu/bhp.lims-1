@@ -45,14 +45,28 @@
           <input tal:replace="structure context/@@authenticator/authenticator"/>
 
           <div class="form-group">
-            <label i18n:translate="" for="couriers">
-              Couriers
+            <label i18n:translate="" for="lab_contacts">
+              Lab Contact
             </label>
-            <select name="courier" class="form-control">
-              <tal:options repeat="courier view/get_couriers_data">
-                <option tal:attributes="value courier/uid"
-                        tal:content="courier/title">
-                  Courier
+            <select name="lab_contact" class="form-control">
+              <tal:options repeat="lab_contact view/get_lab_contacts_data">
+                <option tal:attributes="value lab_contact/uid"
+                        tal:content="lab_contact/title">
+                  Lab Contact
+                </option>
+              </tal:options>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label i18n:translate="" for="lab_department">
+              Lab Department
+            </label>
+            <select name="lab_department" class="form-control">
+              <tal:options repeat="lab_department view/get_lab_departments_data">
+                <option tal:attributes="value lab_department/uid"
+                        tal:content="lab_department/title">
+                  Lab Department
                 </option>
               </tal:options>
             </select>

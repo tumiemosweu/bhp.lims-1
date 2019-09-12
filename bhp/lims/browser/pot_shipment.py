@@ -10,14 +10,14 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from bhp.lims import api
 from bhp.lims import bhpMessageFactory as _
 from bhp.lims import logger
-from bhp.lims.browser.internal_delivery import generate_delivery_pdf
+from bhp.lims.browser.internal_delivery import generate_internal_delivery_pdf
 from bika.lims import workflow as wf
 
 ALLOWED_STATES = ["sample_at_reception"]
 
 
 class POTShipmentView(BrowserView):
-    """Assign a Courier to ARs and submit it to the lab
+    """Assign a lab contact to ARs and submit it to the lab
     """
     template = ViewPageTemplateFile("templates/pot_shipment.pt")
 
@@ -41,17 +41,22 @@ class POTShipmentView(BrowserView):
         # Handle form submit
         if form_submitted and form_send:
             logger.info("*** SEND TO POINT OF TESTING ***")
-            courier_uid = form.get("courier")
-            courier = self.get_object_by_uid(courier_uid)
+            lab_contact_uid = form.get("lab_contact")
+            lab_contact = self.get_object_by_uid(lab_contact_uid)
+            lab_department_uid = form.get("lab_department")
+            lab_department = self.get_object_by_uid(lab_department_uid)
 
-            if courier is None:
-                return self.redirect(message=_("No courier selected"))
+            if lab_contact is None:
+                return self.redirect(message=_("No lab contact selected"))
+
+            if lab_department is None:
+                return self.redirect(message=_("No department selected"))
 
             sent_objects = []
             sent_object_ids = []
             for obj in objs:
                 logger.info("*** SENDING {} TO POINT OF TESTING ***".format(obj.getId()))
-                if self.send_to_pot(obj, courier):
+                if self.send_to_pot(obj, lab_contact):
                     sent_objects.append(obj)
 
             sent_object_ids = map(lambda obj: obj.getId(), sent_objects)
@@ -63,7 +68,7 @@ class POTShipmentView(BrowserView):
                 # TODO Redirect the user to back_url while downloading pdf
 
                 # Generate the delivery report
-                pdf = generate_delivery_pdf(self.context, sent_objects)
+                pdf = generate_internal_delivery_pdf(self.context, sent_objects, lab_department)
                 return self.response_pdf(pdf)
 
             else:
@@ -79,16 +84,16 @@ class POTShipmentView(BrowserView):
         # render the template
         return self.template()
 
-    def send_to_pot(self, ar, courier):
-        """Set the courier and send the AR to the lab
+    def send_to_pot(self, ar, lab_contact):
+        """Set the lab_contact and send the AR to the lab
         """
         # Only proceed if the AR is in an allowed state
         if api.get_workflow_status_of(ar) not in ALLOWED_STATES:
             logger.info("Skipping already sent to point of testing AR {}".format(ar.getId()))
             return False
 
-        # 1. Set the courier to the extended field
-        ar.getField("Courier").set(ar, courier)
+        # 1. Set the lab_contact to the extended field
+        ar.getField("LabContact").set(ar, lab_contact)
 
         # 2. Transition the AR to due
         wf.doActionFor(ar, "send_to_pot")
@@ -104,21 +109,39 @@ class POTShipmentView(BrowserView):
             self.add_status_message(message, level)
         return self.request.response.redirect(redirect_url)
 
-    def get_couriers(self):
-        """Return all available couriers
+    def get_lab_contacts(self):
+        """Return all lab contacts
         """
         query = {
-            "portal_type": "Courier",
+            "portal_type": "LabContact",
             "sort_on": "sortable_title",
             "sort_order": "ascending",
         }
         results = api.search(query)
         return map(api.get_object, results)
 
-    def get_couriers_data(self):
-        """Returns a list of courier data
+    def get_lab_contacts_data(self):
+        """Returns a list of lab contacts data
         """
-        for obj in self.get_couriers():
+        for obj in self.get_lab_contacts():
+            info = self.get_base_info(obj)
+            yield info
+
+    def get_lab_departments(self):
+        """Return all lab departments
+        """
+        query = {
+            "portal_type": "Department",
+            "sort_on": "sortable_title",
+            "sort_order": "ascending",
+        }
+        results = api.search(query)
+        return map(api.get_object, results)
+
+    def get_lab_departments_data(self):
+        """Returns a list of lab departments data
+        """
+        for obj in self.get_lab_departments():
             info = self.get_base_info(obj)
             yield info
 
