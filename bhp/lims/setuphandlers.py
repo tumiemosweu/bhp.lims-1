@@ -6,6 +6,7 @@ import time
 
 import transaction
 from BTrees.OOBTree import OOBTree
+from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import _createObjectByType
 from Products.DCWorkflow.Guard import Guard
 from bhp.lims import api
@@ -61,6 +62,7 @@ CATALOGS_BY_TYPE = [
     # Tuples of (type, [catalog])
     ("BarcodePrinter", ["bika_setup_catalog"]),
     ("Courier", ["bika_setup_catalog"]),
+    ("ClientCourier", ["bika_setup_catalog", "portal_catalog"]),
     ("ReferralLab", ["bika_setup_catalog"]),
 ]
 
@@ -369,6 +371,9 @@ def setup_handler(context):
     # Set the date the Sample was received at the lab, not at point of testing
     # https://github.com/bhp-lims/bhp.lims/issues/233
     fix_i233(portal)
+
+    # Setup client couriers
+    setup_client_couriers(portal)
 
     logger.info("BHP setup handler [DONE]")
 
@@ -1228,3 +1233,48 @@ def fix_i233(portal):
             sample.reindexObject(idxs=["getDateReceived", "is_received"])
 
     logger.info("Reseting Date Received (#233) [DONE]")
+
+
+def remove_action(type_info, action_id):
+    """Removes the action id from the type passed in
+    """
+    actions = map(lambda action: action.id, type_info._actions)
+    if action_id not in actions:
+        return True
+    index = actions.index(action_id)
+    type_info.deleteActions([index])
+    return remove_action(type_info, action_id)
+
+
+def setup_client_couriers(portal):
+    """Setup client couriers
+    """
+    logger.info("Setting up Client couriers ...")
+
+    # Allow ClientCourier types inside Client
+    allow_client_courier_types(portal)
+
+    # Add "Couriers" tab inside Client's view
+    client_type = portal.portal_types.getTypeInfo("Client")
+    remove_action(client_type, "clientcouriers")
+    client_type.addAction(
+        id="clientcouriers",
+        name="Couriers",
+        action="string:${object_url}/clientcouriers",
+        permission="",
+        category="object",
+        visible=True,
+        icon_expr="string:${portal_url}/++resource++bhp.images/courier.png",
+        link_target="",
+        description="",
+        condition="")
+
+def allow_client_courier_types(portal):
+    portal_types = getToolByName(portal, 'portal_types')
+    client = getattr(portal_types, 'Client')
+    allowed_types = client.allowed_content_types
+    if 'ClientCourier' not in allowed_types:
+        client.allowed_content_types = allowed_types + ('ClientCourier',)
+    logger.info("Adding Client Courier to Client allowed types [DONE]")
+
+

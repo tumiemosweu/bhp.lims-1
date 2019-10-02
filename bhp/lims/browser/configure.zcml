@@ -92,6 +92,16 @@
     layer="bhp.lims.interfaces.IBhpLIMS" />
 
   <!--
+  Client Couriers Listing
+  -->
+  <browser:page
+    for="bika.lims.interfaces.IClient"
+    name="clientcouriers"
+    class=".clientcouriers.ClientCouriersView"
+    permission="zope2.View"
+    layer="bhp.lims.interfaces.IBhpLIMS" />
+
+  <!--
   Samples listing with additional filters and columns
   -->
   <subscriber

@@ -2,6 +2,7 @@
 <object name="portal_factory" meta_type="Plone Factory Tool">
  <factorytypes>
   <type portal_type="Courier"/>
+  <type portal_type="ClientCourier"/>
   <type portal_type="BarcodePrinters"/>
   <type portal_type="BarcodePrinter"/>
   <type portal_type="ReferralLabs"/>

@@ -217,7 +217,7 @@ fields = [
     ExtReferenceField(
         "Courier",
         required=0,
-        allowed_types='Courier',
+        allowed_types=('Courier', 'ClientCourier'),
         relationship='AnalysisRequestCourier',
         mode="rw",
         read_permission=View,
