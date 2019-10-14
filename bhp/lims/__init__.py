@@ -35,6 +35,8 @@ def initialize(context):
     from content.courier import Courier # noqa
     from content.couriers import Couriers # noqa
 
+    from content.clientcourier import ClientCourier
+
     from bhp.lims.content.barcodeprinter import BarcodePrinter  # noqa
     from bhp.lims.controlpanel.barcodeprinters import BarcodePrinters # noqa
 

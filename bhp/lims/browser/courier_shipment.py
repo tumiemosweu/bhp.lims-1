@@ -108,7 +108,7 @@ class CourierShipmentView(BrowserView):
         """Return all available couriers
         """
         query = {
-            "portal_type": "Courier",
+            "portal_type": ["Courier", "ClientCourier"],
             "sort_on": "sortable_title",
             "sort_order": "ascending",
         }
@@ -120,6 +120,8 @@ class CourierShipmentView(BrowserView):
         """
         for obj in self.get_couriers():
             info = self.get_base_info(obj)
+            if obj.portal_type == "ClientCourier":
+                info["title"] = " ".join([info["title"], "(clinic)"])
             yield info
 
     def get_objects(self):

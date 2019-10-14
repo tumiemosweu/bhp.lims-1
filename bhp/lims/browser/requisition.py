@@ -60,6 +60,15 @@ class RequisitionFormPdf(BrowserView):
         contact = api.get_user_contact(user)
         return contact.getFullname()
 
+    def get_analyses(self, sample):
+        raw_analyses = sample.getAnalyses(full_objects=True)
+        template = self.get(sample, 'Template')
+        ar_settings = template and template.AnalysisServicesSettings or [{}]
+        sample_uids = [a.get('uid') for a in ar_settings if a.get('hidden')]
+        analyses = filter(lambda x: x.getServiceUID() not in sample_uids, raw_analyses)
+        return analyses
+
+
 def generate_requisition_pdf(ar_or_sample):
     if not ar_or_sample:
         logger.warn("No Analysis Request or Sample provided")
